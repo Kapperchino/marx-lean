@@ -7,7 +7,7 @@ including its audited conversion appendix, using **Lean 4.35.0** and
 
 The conventional mathematical exposition is
 [`research_context_mathematical_paper.pdf`](research_context_mathematical_paper.pdf),
-with numbered theorems, prose proofs, equations, and exact examples. Its editable
+with consolidated theorem statements, prose proofs, equations, and small examples. Its editable
 LaTeX source is
 [`research_context_mathematical_paper.tex`](research_context_mathematical_paper.tex).
 The local macOS exporter is `python3 scripts/export_paper.py`; it uses Node,
@@ -42,7 +42,24 @@ conversion pair together. `equalResidual_iff_spectral` proves that the conversio
 pair exists uniquely exactly when the nonnegative reproduction matrix has
 spectral radius below one.
 
-## Correspondence with the PDF
+## Correspondence with the simplified mathematical paper
+
+The shorter paper groups results by the argument they share. Its principal
+statements correspond to the following existing proofs; the Lean library also
+retains the full numerical examples from the original paper.
+
+| Mathematical paper | Formal results |
+| --- | --- |
+| Theorem 1.1 and Corollary 1.2: productivity and accounts | `spectral_iff_productive`, `productive_iff_summable`, `productive_iff_witness`, `productive_iff_reproduction`; `Productive.labor_existsUnique`, `.labor_series`, `.scalar_existsUnique`; `project_fresh` |
+| Theorem 2.1: closure and support | `Capability.closure_fixed`, `.closure_least`, `.finite_eq_closure`; `inverse_support`, `label_inverse_support`, `label_support_le_declared` |
+| Proposition 2.2: missing projects and terminal outputs | `Capability.missing_fixed`, `.missing_least`, `.finite_missing`; `Productive.append`, `terminal_labor`, `copying_limit` |
+| Proposition 3.1: inventories | `inventory_reconciliation`, `inventory_horizon` |
+| Theorem 4.1 and Proposition 4.2: normalized weights and augmented system | `equalResidual_iff_spectral`, `Conversion.existsUnique`, `.change_reference`, `.equal_column_sums`; `augmented_inverse`, `augmented_spectral_iff`, `unified_unique` |
+| Theorem 5.1: boundary reduction | `Productive.external`, `.eliminate`; `boundary_labor_solution`, `boundary_demand_labor`, `boundary_conversion`; `Capability.boundary_exact` |
+| Proposition 5.2: units | `labor_change_units`, `demand_change_units`, `support_change_units`, `reproduction_change_physical_units`, `lifetime_unit_covariance`, `residual_change_labor_units`, `reference_rebase` |
+| Propositions 6.1–6.2: changes and error bounds | `labor_difference`, `labor_monotone`, `labor_hasDerivAt`, `coefficient_hasDerivAt`, `beta_hasDerivAt`, `normalized_derivative`, `values_derivative`, `weighted_labor_truncation`, `residual_error_bound`, `ratio_bounds` |
+
+## Correspondence with the supplied audited PDF
 
 Names below are in `Research` unless an additional namespace is shown.
 

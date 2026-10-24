@@ -7,548 +7,279 @@
 \newtheorem{theorem}{Theorem}[section]
 \newtheorem{proposition}[theorem]{Proposition}
 \newtheorem{corollary}[theorem]{Corollary}
-\newtheorem{definition}[theorem]{Definition}
-\newtheorem{example}[theorem]{Example}
 \title{Research as Production Context\\[4pt]\large Conditional labor requirements, reusable capabilities,\\and normalized occupational conversion}
 \author{}
 \date{24 October 2026}
 \begin{document}
 \maketitle
 \begin{abstract}
-We study a finite production system whose selected recipes depend on reusable research, designs, and software. Under spectral productivity, nonnegative input and occupational labor matrices determine a unique conditional labor account. A separate Boolean closure records the capabilities supporting those recipes. We give proofs of the productivity equivalences, sensitivity and unit covariance, finite capability closure, project requirements, inventory reconciliation, and exact elimination of an external production boundary. An optional reproduction model determines positive normalized occupational weights under an explicit equal-residual assumption. Its existence criterion, augmented-system interpretation, comparative statics, error bounds, and boundary and unit transformations are established. Exact examples distinguish reusable prerequisites from additive material inputs and show which conclusions fail when hypotheses or accounting adjustments are omitted. The paper is a mathematical exposition of a formally verified model; its economic interpretation remains conditional on the stated primitives and weighting convention.
+A production recipe consumes inputs and labor but may also depend on reusable knowledge. We describe these two kinds of requirement by a nonnegative matrix inverse and a Boolean path closure. They determine occupational labor, supporting capabilities, and the fresh cost of projects. The same constructions give inventory identities, boundary reductions, sensitivity formulas, and error bounds. An optional equal-residual convention determines normalized occupational weights through a second nonnegative inverse. We prove the results and give small examples that identify their limits. All conclusions are conditional on the selected recipes, units, and stated assumptions.
 \end{abstract}
 
-\section{Data, conventions, and scope}
-Fix a production context: a boundary, evaluation stage, accessible capabilities, installed equipment, and a selection of recipes and suppliers. There are $n\geq 1$ output nodes, $m\geq 1$ occupational categories, and $q\geq 0$ capability labels. Each output has a specified physical unit and one selected recipe. Distinct techniques may be represented by distinct nodes. Within a calculation these choices are fixed.
+\section{The model and its solution}
+Fix $n\geq1$ outputs with specified units and selected recipes, and $m\geq1$ occupations. Let $A\geq0$ be the $n\times n$ input matrix and $H\geq0$ the $m\times n$ direct-labor matrix: $A_{ij}$ is input $i$ per unit of output $j$, and $H_{rj}$ is category-$r$ labor per unit of output $j$. Vectors are columns; inequalities are entrywise. Write $w\gg0$ for strictly positive components, $Aw\ll w$ for componentwise strict inequality, and $\mathbf1$ for an all-ones vector. The spectral radius $\rho(A)$ includes complex eigenvalues; $\|\cdot\|_\infty$ is the maximum absolute row-sum norm.
 
-The quantitative primitives are
+These data describe one production context. Recipe eligibility, capacity, scheduling, and project success remain separate conditions. Reusable capabilities are recorded by a graph in Section 2; creating them is a project whose costs are accounted for explicitly. No historical cost allocation or occupational weighting is implicit in $H$.
+
+\begin{theorem}[Productivity]
+For $A\geq0$, the following are equivalent: (i) $\rho(A)<1$; (ii) $\sum_{k\geq0}A^k$ converges; (iii) $I-A$ has a nonnegative inverse; (iv) some $w\gg0$ satisfies $Aw\ll w$; (v) every $y\geq0$ has a unique nonnegative solution of $x=Ax+y$. Call $A$ productive when these hold. Then
 \begin{equation}
-A\in\mathbb R_{\geq 0}^{n\times n},\qquad H\in\mathbb R_{\geq 0}^{m\times n}.
+N=(I-A)^{-1}=\sum_{k\geq0}A^k\geq I,\qquad x=Ny.
 \end{equation}
-Here $A_{ij}$ is the amount of input $i$ needed per unit of output $j$, and $H_{rj}$ is the direct labor of category $r$ per unit of output $j$. Vectors are columns. Every real inequality is entrywise; $w\gg 0$ means that each component is positive, and $Aw\ll w$ means strict inequality in every component. The spectral radius $\rho(A)$ includes all complex eigenvalues. We write $I$ for an identity matrix, $\mathbf 1$ for an all-ones vector, and $e_j$ for a coordinate vector, with dimensions determined by context.
-
-The logical primitives are Boolean matrices $B\in\{0,1\}^{n\times n}$ and $D\in\{0,1\}^{q\times n}$. The edge $B_{ij}=1$ says that output $j$ depends on upstream output $i$; $D_{rj}=1$ assigns capability $r$ directly to recipe $j$. We require $\operatorname{supp}(A)\leq B$, where support means strict positivity. Boolean multiplication, denoted $\odot$, uses AND within a path and OR across alternative paths. Ordinary juxtaposition always means real matrix multiplication.
-
-Local recipe eligibility requires its direct capability labels to be accessible to its producer. Availability, capacity, material supply, and scheduling are additional conditions. A missing production route is not a zero-cost recipe. The results below calculate requirements conditional on the selected context; they do not establish feasibility or project success.
-
-Reusable capabilities are not consumed in proportion to output. Their creation can require labor and materials, which are recorded in a separate project account. No rule distributing historical research expenditure over future output is built into the equations. Likewise, occupational hours and a scalar weighted account are distinct mathematical objects.
-
-\section{Productivity and the occupational labor account}
-\begin{theorem}[Equivalent productivity criteria]
-For a nonnegative square matrix $A$, the following conditions are equivalent: (i) $\rho(A)<1$; (ii) the matrix series $\sum_{k=0}^{\infty}A^k$ converges; (iii) $I-A$ has a nonnegative inverse; (iv) there exists $w\gg 0$ with $Aw\ll w$; (v) every $y\geq 0$ admits exactly one nonnegative solution of $x=Ax+y$. When these conditions hold, write
-\begin{equation}
-N=(I-A)^{-1}=\sum_{k=0}^{\infty}A^k\geq I.
-\end{equation}
-The unique reproduction solution is $x=Ny$. Such a matrix $A$ will be called productive.
 \end{theorem}
 \begin{proof}
-Assume (i). Choose $r$ with $\rho(A)<r<1$. The spectral-radius formula in a finite-dimensional matrix algebra implies $\|A^k\|\leq r^k$ for all sufficiently large $k$, in any fixed submultiplicative matrix norm. Applying this to the complexification, and then restricting to the real entries, proves convergence by comparison with a geometric series. Thus (ii) holds.
+For (i)$\Rightarrow$(ii), choose $\rho(A)<r<1$. The spectral-radius formula gives $\|A^k\|\leq r^k$ eventually, so the series converges. For (ii)$\Rightarrow$(iii), take limits in $(I-A)\sum_{k=0}^{K}A^k=I-A^{K+1}=\sum_{k=0}^{K}A^k(I-A)$. Its nonnegative sum is a two-sided inverse and is at least $I$.
 
-If (ii) holds, its terms tend to zero. The finite geometric identities are
+For (iii)$\Rightarrow$(iv), put $w=N\mathbf1$. Then $w=Aw+\mathbf1\geq\mathbf1$. For (iv)$\Rightarrow$(i), put $P=\operatorname{diag}(w)$. Similarity and the row-sum bound give
 \begin{equation}
-(I-A)\sum_{k=0}^{K}A^k=I-A^{K+1}=\left(\sum_{k=0}^{K}A^k\right)(I-A).
+\rho(A)=\rho(P^{-1}AP)\leq\|P^{-1}AP\|_\infty=\max_i\frac{(Aw)_i}{w_i}<1.
 \end{equation}
-Taking limits produces a two-sided inverse. Its entries are nonnegative because every partial sum is nonnegative. The identity term also gives $N\geq I$. This proves (iii).
-
-Under (iii), set $w=N\mathbf 1$. The inverse equation gives $w=Aw+\mathbf 1$. Since $N\geq 0$ and $A\geq 0$, this implies $w\geq\mathbf 1\gg 0$ and $Aw\ll w$, proving (iv) without assuming the series representation.
-
-Under (iv), put $P=\operatorname{diag}(w_1,\ldots,w_n)$. The nonnegative matrix $P^{-1}AP$ has maximum row sum
-\begin{equation}
-\eta=\max_i\frac{(Aw)_i}{w_i}<1.
-\end{equation}
-Similarity preserves the spectral radius, and the spectral radius is bounded by the maximum absolute row-sum norm. Hence $\rho(A)\leq\eta<1$, proving (i).
-
-Condition (iii) gives $x=Ny\geq 0$ for $y\geq 0$, and invertibility gives uniqueness even among signed vectors. Thus (v) follows. Conversely, apply (v) to $y=\mathbf 1$. Its nonnegative solution satisfies $x=Ax+\mathbf 1\geq\mathbf 1$ and $Ax\ll x$, giving (iv). All five conditions are therefore equivalent.
+Finally, (iii) gives the unique solution $x=Ny\geq0$; conversely, a nonnegative solution for $y=\mathbf1$ is a witness for (iv).
 \end{proof}
 
-\begin{theorem}[Unique labor account]
-If $A$ is productive, there is a unique real matrix $G$ satisfying $G=H+GA$. It is nonnegative and is given by
+\begin{corollary}[Labor, final demand, and projects]
+For productive $A$, the unique solution of $G=H+GA$ is
 \begin{equation}
-G=HN=\sum_{k=0}^{\infty}HA^k.
+G=HN=\sum_{k\geq0}HA^k\geq0.
 \end{equation}
-For final demand $y\geq 0$, total occupational requirements are $Gy=HNy$. For one unit of output $j$, they satisfy $Ge_j=h_j+Ga_j$, where $h_j=He_j$ and $a_j=Ae_j$.
-\end{theorem}
+Final demand $y\geq0$ requires $Gy=HNy$ occupational hours. A project with direct labor $h\geq0$ and freshly reproduced inputs $a\geq0$ requires $\ell=h+Ga$. For specified weights $\omega\gg0$, $v=G^{\mathsf T}\omega$ is the unique solution of $v=H^{\mathsf T}\omega+A^{\mathsf T}v$, and the scalar accounts are $v^{\mathsf T}y=\omega^{\mathsf T}Gy$ and $\omega^{\mathsf T}\ell$.
+\end{corollary}
 \begin{proof}
-The balance equation is equivalent to $G(I-A)=H$. Multiplication by $N$ gives uniqueness and the formula $G=HN$; substitution proves existence. Products of nonnegative matrices are nonnegative. Continuity of left multiplication by $H$ gives the series expression. The final-demand identity follows from $x=Ny$, and the unit requirement is the $j$th column of the balance equation.
+Multiply $G(I-A)=H$ by $N$; the series follows by continuity. Reproducing $a$ needs gross output $Na$, hence labor $HNa$, in addition to $h$. Transposing the labor equation gives the scalar equation, whose inverse is $N^{\mathsf T}$. Taking column $j$ also gives the unit requirement $Ge_j=He_j+GAe_j$.
 \end{proof}
 
-\begin{proposition}[Supplied scalar weights]
-For any specified $\omega\gg 0$, the column $v=G^{\mathsf T}\omega$ is the unique solution of
-\begin{equation}
-v=H^{\mathsf T}\omega+A^{\mathsf T}v.
-\end{equation}
-Its evaluation on final demand is $v^{\mathsf T}y=\omega^{\mathsf T}Gy$.
-\end{proposition}
-\begin{proof}
-Transpose $G=H+GA$ and multiply by $\omega$. Since $I-A^{\mathsf T}$ has inverse $N^{\mathsf T}$, the resulting linear system has a unique solution. The final identity is associativity of the scalar product.
-\end{proof}
+A balance for one particular $H$ does not establish productivity: $A=[2]$, $H=[0]$ admits $G=[0]$. Nor does the balance determine $\omega$. Section 4 supplies an optional weighting convention.
 
-The existence of a labor balance for a particular $H$ does not establish productivity. For example, $A=[2]$ and $H=[0]$ admit the nonnegative account $G=[0]$, although $\rho(A)=2$. Similarly, a supplied $\omega$ does not become identified by the balance equation itself. A separate, optional weighting assumption is introduced in Section 9.
+\section{Capabilities and development projects}
+Let $B$ be a Boolean $n\times n$ dependency matrix: $B_{ij}=1$ means that output $j$ depends on upstream output $i$. Let $D$ be a Boolean $q\times n$ matrix of direct capability labels, allowing $q=0$, and require $\operatorname{supp}(A)\leq B$, where support marks positive entries. Boolean multiplication $\odot$ uses AND along a path and OR across paths. All other products use real arithmetic.
 
-\section{Comparative statics, units, and approximation}
-\begin{proposition}[Monotonicity and exact finite changes]
-Suppose $A$ is productive, $0\leq A'\leq A$, and $0\leq H'\leq H$. Then $A'$ is productive and $G'\leq G$. More generally, for any two productive systems, with $N'=(I-A')^{-1}$, one has
-\begin{equation}
-G'-G=\bigl(H'-H+G(A'-A)\bigr)N'.
-\end{equation}
-\end{proposition}
-\begin{proof}
-A positive witness for $A$ is also a witness for $A'$, since $A'w\leq Aw\ll w$. Thus $A'$ is productive. By induction, $(A')^k\leq A^k$ for every $k$, so the nonnegative series give $H'(A')^k\leq HA^k$ and hence $G'\leq G$. For the finite-change formula, subtract the two balance equations in the form
-\begin{equation}
-(G'-G)(I-A')=H'-H+G(A'-A).
-\end{equation}
-Right multiplication by $N'$ proves the claim. This identity does not require either system to dominate the other.
-\end{proof}
-
-\begin{proposition}[Differentiability]
-Let $A(t)$ and $H(t)$ be differentiable at $t_0$, and assume $A(t_0)$ is productive. In fixed coordinates, the inverse-based account is defined near $t_0$ and differentiable there at $t_0$, with
-\begin{equation}
-dN=N\,dA\,N,\qquad dG=(dH+G\,dA)N.
-\end{equation}
-In particular, with $H$ fixed,
-\begin{equation}
-\frac{\partial G_{rj}}{\partial A_{ik}}=G_{ri}N_{kj}.
-\end{equation}
-\end{proposition}
-\begin{proof}
-The set of invertible matrices is open. Differentiating the inverse map at $I-A(t_0)$ gives $dN=-N\,d(I-A)\,N=N\,dA\,N$. The product rule applied to $G=HN$ then yields $dG=dH\,N+HN\,dA\,N$. For the coefficient formula, choose $dA=e_i e_k^{\mathsf T}$ and take entry $(r,j)$.
-\end{proof}
-
-These derivatives concern the smooth algebraic extension of the account. They do not assert differentiability when the catalogue, recipe selection, or feasibility regime changes. Nonnegativity of a parameterized family is needed only when interpreting its nearby points as production systems.
-
-\begin{proposition}[Physical output units]
-Let $P$ be a positive diagonal matrix. Under the change of physical units
-\begin{equation}
-A'=P^{-1}AP,\qquad H'=HP,\qquad y'=P^{-1}y,
-\end{equation}
-productivity and numerical support are preserved, and
-\begin{equation}
-N'=P^{-1}NP,\qquad G'=GP,\qquad G'y'=Gy.
-\end{equation}
-\end{proposition}
-\begin{proof}
-The identity $I-A'=P^{-1}(I-A)P$ gives the inverse formula. Similarity preserves the spectral radius, while multiplication of an entry by positive diagonal factors preserves whether it is positive. Substitution into $G'=H'N'$ gives $G'=GP$, after which the demand identity follows by cancellation.
-\end{proof}
-
-\begin{proposition}[A certified truncation bound]
-Let $w\gg 0$ satisfy $Aw\ll w$, put $P=\operatorname{diag}(w)$, and let $\eta=\|P^{-1}AP\|_\infty<1$, where the norm is the maximum absolute row-sum norm. For $k\geq 0$, define
-\begin{equation}
-G^{[k]}=H\sum_{i=0}^{k}A^i.
-\end{equation}
-Then $0\leq G^{[k]}\leq G$, and
-\begin{equation}
-\left\|(G-G^{[k]})P\right\|_\infty\leq\|HP\|_\infty\frac{\eta^{k+1}}{1-\eta}.
-\end{equation}
-\end{proposition}
-\begin{proof}
-Nonnegativity gives the order bounds. If $\widetilde A=P^{-1}AP$, then $A^iP=P\widetilde A^i$. Consequently the scaled error is $HP\sum_{i=k+1}^{\infty}\widetilde A^i$. Apply the triangle inequality and submultiplicativity, and sum the scalar geometric tail. The strict bound on $\eta$ is exactly the row-sum calculation in the productivity theorem.
-\end{proof}
-
-An unscaled row sum greater than one is not evidence against productivity: changing physical units changes row sums, and even a nilpotent matrix can have arbitrarily large entries. The witness supplies a scale in which the geometric estimate is valid.
-
-\section{Reusable capabilities and numerical support}
-\begin{definition}[Capability closure]
-For a Boolean matrix $B$, let $B^0=I$ and define its reflexive transitive closure by
+\begin{theorem}[Path closure and numerical support]
+With Boolean powers, define
 \begin{equation}
 B^*=\bigvee_{k=0}^{n-1}B^k,\qquad R=D\odot B^*.
 \end{equation}
-Powers here use Boolean multiplication. Thus $R_{rj}=1$ precisely when some node directly labeled by $r$ reaches $j$ along upstream-to-downstream dependency edges, including a path of length zero.
-\end{definition}
-
-\begin{theorem}[Least fixed point and finite termination]
-The matrix $R$ is the least solution, in entrywise Boolean order, of
+Then $R$ is the least solution of $R=D\vee(R\odot B)$. Iterating from $R_0=D$ reaches it after at most $n-1$ rounds. If $A$ is productive and $\widehat D$ is the real zero-one version of $D$, then
 \begin{equation}
-R=D\vee(R\odot B).
+\operatorname{supp}(N)=\operatorname{supp}(A)^*,\qquad
+\operatorname{supp}(\widehat D N)=D\odot\operatorname{supp}(A)^*\leq R.
 \end{equation}
-The iteration $R_0=D$ and $R_{s+1}=D\vee(R_s\odot B)$ reaches $R$ after at most $n-1$ propagation rounds.
+The last inequality is an equality when $B=\operatorname{supp}(A)$.
 \end{theorem}
 \begin{proof}
-Every finite walk can be shortened by deleting repeated-vertex cycles. Reachability between different vertices therefore has a simple path of length at most $n-1$; reachability from a vertex to itself already includes the length-zero path. Thus allowing all finite path lengths gives exactly $B^*$. Appending one edge to a path proves $D\vee(R\odot B)\leq R$, while separating a nonempty path into its last edge and initial segment proves the reverse inequality.
+Deleting cycles reduces a path to at most $n-1$ edges, with length zero covering each vertex itself. Splitting off or appending a last edge proves the fixed-point equation. Any fixed point contains $D$ and, inductively, every $D\odot B^k$, proving leastness. The $s$th iterate contains exactly the labeled paths of length at most $s$.
 
-If $Q=D\vee(Q\odot B)$, then $D\leq Q$. Induction on path length gives $D\odot B^k\leq Q$ for every $k$, so $R\leq Q$. Finally, induction on $s$ gives $R_s=\bigvee_{k=0}^{s}D\odot B^k$. At $s=n-1$ this is $R$.
+For nonnegative matrices, a product entry is positive exactly when one summand is positive. Thus $(A^k)_{ij}>0$ records a length-$k$ support path. An entry of the nonnegative series for $N$ is positive exactly when some term is positive. This proves both support identities; adding declared edges can only enlarge closure.
 \end{proof}
 
-Leastness cannot be replaced by uniqueness. If $D=0$ and $B=I$, every Boolean matrix of the appropriate dimensions is a fixed point. The construction still selects $R=0$. When $q=0$, all capability statements have the corresponding empty-row interpretation. Closure records supporting capabilities in the production chain; it does not require every downstream producer to possess every upstream producer's labels locally.
+Leastness is essential: for $D=0$, $B=I$, every Boolean matrix is a fixed point. Also, with $A=0$, $D=(1,0)$, and a declared edge $1\to2$, numerical support is $(1,0)$ but $R=(1,1)$. Closure records upstream support, while local eligibility still asks whether a recipe's direct labels are accessible to its producer.
 
-\begin{theorem}[Support of the numerical inverse]
-For productive $A$,
+\begin{proposition}[Missing projects and terminal outputs]
+For $r\geq1$ projects, let $Q_{ij}=1$ mean that project $j$ needs result $i$. Let $b$ mark missing results and $\tau$ mark targets. The iteration
 \begin{equation}
-\operatorname{supp}(N)=\operatorname{supp}(A)^*.
+u_0=b\wedge\tau,\qquad u_{s+1}=b\wedge\bigl(\tau\vee(Q\odot u_s)\bigr)
 \end{equation}
-Writing $\widehat D$ for the real zero-one matrix associated with $D$, one also has
+reaches its least fixed point within $r-1$ rounds. It marks the missing targets and prerequisites reached along paths entirely within the missing set.
+
+For productive $A$, appending an output used by no selected recipe gives
 \begin{equation}
-\operatorname{supp}(\widehat D N)=D\odot\operatorname{supp}(A)^*\leq D\odot B^*.
+\overline A=\begin{pmatrix}A&a\\0&0\end{pmatrix},\quad
+(I-\overline A)^{-1}=\begin{pmatrix}N&Na\\0&1\end{pmatrix},\quad
+\overline G=\begin{pmatrix}G&h+Ga\end{pmatrix},
 \end{equation}
-Equality with the declared capability closure holds if $B=\operatorname{supp}(A)$, but need not hold for a larger declared graph.
-\end{theorem}
-\begin{proof}
-An entry of a product of nonnegative matrices is positive exactly when some corresponding product of entries is positive. By induction, $(A^k)_{ij}>0$ exactly when there is a length-$k$ path from $i$ to $j$ in the support graph. The nonnegative series for $N$ has a positive entry exactly when at least one summand has a positive entry. This proves the first identity. Apply the same positivity criterion to the finite sum defining $(\widehat D N)_{rj}$. Finally, enlarging the edge set enlarges reachability.
-\end{proof}
-
-For strict inclusion, take two outputs, $A=0$, $D=(1,0)$, and a declared edge from output 1 to output 2. Then $N=I$, so numerical support gives $(1,0)$, whereas the declared capability closure is $(1,1)$. A declared technical dependency can therefore contain information absent from the material coefficients.
-
-\section{Projects, shared prerequisites, and terminal activities}
-A project has ordinary inputs $a\geq 0$, direct occupational labor $h\geq 0$, prerequisites, and an outcome set of reusable capabilities. If the prerequisites are accessible, an attempted project incurs its actual resources. On success its outcomes are added to accessible capabilities; failure may add nothing while still incurring costs. Eligibility and successful completion are distinct conditions.
-
-\begin{proposition}[Fresh project requirements]
-If all ordinary project inputs are freshly reproduced within a productive context, the project's occupational requirements are
-\begin{equation}
-\ell=h+Ga=h+HNa\geq 0.
-\end{equation}
-For supplied weights $\omega$, its scalar account is $\omega^{\mathsf T}\ell$.
+where $a,h\geq0$ and $\overline H=(H\ h)$. Hence $\overline A$ is productive. With $G$ fixed, $a_\varepsilon,h_\varepsilon\to0$ implies $h_\varepsilon+Ga_\varepsilon\to0$.
 \end{proposition}
 \begin{proof}
-The required ordinary final demand is $a$, whose gross reproduction is $Na$. Ordinary production therefore uses $HNa$ occupational hours. Add the project's own direct labor. Nonnegativity follows from that of all factors.
+Apply the path argument to backward prerequisite paths, restricting every vertex to the missing set. The mask stops expansion at satisfied results. For the terminal output, multiply the displayed block matrices to verify the nonnegative inverse, then multiply by $\overline H$. The limit follows by continuity.
 \end{proof}
 
-The word fresh is essential. Inputs drawn from an existing inventory have already been produced at another stage. Section 6 reconciles the project account with chronological labor without counting their manufacture twice.
+A successful project adds its outcome capabilities; a failed attempt may still incur costs. For a fixed context with fresh inputs, attempting each selected project once sums costs over distinct projects. Two projects costing 6 and 8 with a shared prerequisite costing 4 therefore require 18, or 14 if the prerequisite is already satisfied. Closure alone does not make a cycle of missing prerequisites executable. A copying requirement may tend to zero while its release capability remains necessary.
 
-\begin{proposition}[Closure of missing prerequisite projects]
-Suppose there are $r\geq 1$ candidate projects. Let $P_{ij}=1$ mean that project $j$ needs the reusable result of project $i$, let $b_i=1$ mean that result $i$ is not yet satisfied, and let $\tau$ mark the targets. Define
+\section{Inventories}
+At stage $t$, write $x_t$ for gross production, $y_t$ for deliveries, $s_t$ for opening stocks, and $z_t$ for project attempts. Let $J_t$ contain their ordinary inputs and $K_t$ their direct labor. Assume $s_{t+1}=s_t+(I-A_t)x_t-y_t-J_tz_t$ and productivity of each $A_t$.
+
+\begin{proposition}[Chronological reconciliation]
+For $G_t=H_t(I-A_t)^{-1}$, actual stage labor is
 \begin{equation}
-u_0=b\wedge\tau,\qquad u_{s+1}=b\wedge\bigl(\tau\vee(P\odot u_s)\bigr).
+H_tx_t+K_tz_t=G_t(y_t+J_tz_t+s_{t+1}-s_t)+K_tz_t.
 \end{equation}
-This iteration reaches its least fixed point after at most $r-1$ rounds. It contains precisely the missing projects connected to a missing target by prerequisite paths whose every vertex is missing.
-\end{proposition}
-\begin{proof}
-An induction shows that $u_s$ marks the allowed paths of length at most $s$, starting at the requested targets and tracing prerequisites backwards. The mask is imposed at every step, so a satisfied result stops expansion. Deleting a cycle from an allowed path preserves the mask condition and leaves at most $r-1$ edges. This proves stabilization. Any fixed point must contain the masked targets and each of their masked prerequisites; induction on path length proves leastness.
-\end{proof}
-
-Under a fixed context and a plan that attempts each selected project once, additive fresh-input costs are summed over distinct selected projects. A common prerequisite is then counted once. Closure does not prove that a cycle of missing prerequisites can be executed from the available starting state, nor that a feasible schedule or successful outcome exists.
-
-\begin{theorem}[Appending a terminal activity]
-Let $A$ be productive, and append an activity that uses inputs $a\geq 0$ and direct labor $h\geq 0$ but is not used as an input by any selected activity. Then
+If $A,H$ are constant, total labor over $T$ stages is
 \begin{equation}
-\overline A=\begin{pmatrix}A&a\\0&0\end{pmatrix},\qquad\overline H=\begin{pmatrix}H&h\end{pmatrix}
-\end{equation}
-is productive, and its inverse and labor account are
-\begin{equation}
-\overline N=\begin{pmatrix}N&Na\\0&1\end{pmatrix},\qquad\overline G=\begin{pmatrix}G&h+Ga\end{pmatrix}.
-\end{equation}
-\end{theorem}
-\begin{proof}
-Block multiplication shows that the displayed $\overline N$ is a two-sided inverse of $I-\overline A$. All its entries are nonnegative, so the productivity theorem applies. Multiplying $\overline H\overline N$ gives the claimed labor account.
-\end{proof}
-
-\begin{corollary}[A conditional copying limit]
-For a fixed productive context, if terminal copying coefficients satisfy $a_\varepsilon\to 0$ and $h_\varepsilon\to 0$, then $h_\varepsilon+Ga_\varepsilon\to 0$.
-\end{corollary}
-\begin{proof}
-Multiplication by the fixed matrix $G$ and vector addition are continuous.
-\end{proof}
-
-The release or design needed for copying may remain a Boolean prerequisite throughout this limit. The result neither sets actual copying coefficients to zero nor erases the labor of the development project.
-
-\section{Inventories and chronological labor}
-At stage $t$, let $x_t$ be ordinary gross output, $y_t$ final deliveries, $s_t$ opening stocks, and $z_t$ project-attempt quantities. Let $J_t$ contain ordinary project inputs and $F_t$ direct project labor. The symbol $F_t$ in this section is independent of the reproduction matrix $F$ introduced later. Assume the material balance
-\begin{equation}
-s_{t+1}=s_t+(I-A_t)x_t-y_t-J_tz_t.
-\end{equation}
-Actual occupational labor over stages $0,\ldots,T-1$ is $L=\sum_{t=0}^{T-1}(H_tx_t+F_tz_t)$. The algebra permits signed stock changes and real attempt quantities, and hence also applies to nonnegative integer attempt counts.
-
-\begin{proposition}[Inventory reconciliation]
-If $A_t$ is productive and $G_t=H_t(I-A_t)^{-1}$, then
-\begin{equation}
-H_tx_t+F_tz_t=G_t(y_t+J_tz_t+s_{t+1}-s_t)+F_tz_t.
-\end{equation}
-If $A_t=A$ and $H_t=H$ are constant, then
-\begin{equation}
-L=\sum_{t=0}^{T-1}\bigl[Gy_t+(F_t+GJ_t)z_t\bigr]+G(s_T-s_0).
+L=\sum_{t=0}^{T-1}\bigl[Gy_t+(K_t+GJ_t)z_t\bigr]+G(s_T-s_0).
 \end{equation}
 \end{proposition}
 \begin{proof}
-Rearrange the material balance as $(I-A_t)x_t=y_t+J_tz_t+s_{t+1}-s_t$. Multiply by $G_t$ and use $G_t(I-A_t)=H_t$. This proves the stage identity. In a constant context, expand the right-hand side and sum. The stock terms telescope because the same $G$ multiplies every increment; their sum is $G(s_T-s_0)$.
+Rearrange the stock balance and use $G_t(I-A_t)=H_t$. Sum; when $G$ is fixed, its stock increments telescope.
 \end{proof}
 
-For example, suppose one unit of an input requires one labor hour. It is produced into stock in stage 0 and used by a project requiring two direct hours in stage 1. Actual labor is three hours. Adding the first-stage production hour to the project's three-hour fresh-input requirement would incorrectly give four; the negative stock adjustment removes the duplicated hour.
+An input produced in one hour and later consumed by a project using two direct hours contributes three hours in total. Adding both its production hour and the project's three-hour fresh requirement would count that input twice. The stock correction prevents this. With changing $G_t$, retain each weighted increment: $G_0=1$, $G_1=2$, and stocks $(0,1,0)$ give $1-2=-1$, despite zero net stock change. Signed stock changes and real attempt quantities are permitted by these identities.
 
-With a changing context, the stock term is $\sum_tG_t(s_{t+1}-s_t)$ and generally cannot be replaced by an endpoint expression. In one dimension, $G_0=1$, $G_1=2$, and stocks $(s_0,s_1,s_2)=(0,1,0)$ give a weighted stock sum of $-1$, although the net stock change is zero.
-
-\section{Exact elimination of an external boundary}
-Partition the output nodes into retained nodes $L$ and external nodes $O$, and write
-\begin{equation}
-A=\begin{pmatrix}A_{LL}&A_{LO}\\A_{OL}&A_{OO}\end{pmatrix},\qquad H=\begin{pmatrix}H_L&H_O\end{pmatrix}.
-\end{equation}
-The cross-block orientation follows the input-per-output convention: $A_{LO}$ records retained inputs used by external production. Assume both blocks are nonempty for notation; the empty-block cases reduce to deletion of the corresponding empty terms.
-
-\begin{theorem}[Numerical boundary reduction]
-If $A$ is productive, then $A_{OO}$ is productive. Set
-\begin{equation}
-\begin{aligned}
-N_O&=(I-A_{OO})^{-1},\\
-A_{\mathrm{eff}}&=A_{LL}+A_{LO}N_OA_{OL},\\
-H_{\mathrm{eff}}&=H_L+H_ON_OA_{OL}.
-\end{aligned}
-\end{equation}
-The effective matrix $A_{\mathrm{eff}}$ is productive, and the full labor account satisfies
-\begin{equation}
-G_L=H_{\mathrm{eff}}(I-A_{\mathrm{eff}})^{-1},\qquad G_O=(H_O+G_LA_{LO})N_O.
-\end{equation}
-For final demand $(y_L,y_O)$, gross retained production and total labor are
-\begin{equation}
-\begin{aligned}
-x_L&=(I-A_{\mathrm{eff}})^{-1}(y_L+A_{LO}N_Oy_O),\\
-Hx&=H_{\mathrm{eff}}x_L+H_ON_Oy_O.
-\end{aligned}
-\end{equation}
-\end{theorem}
-\begin{proof}
-Take a positive witness $w=(w_L,w_O)$ for $A$. The external inequality implies $A_{OO}w_O\ll w_O$, so $A_{OO}$ is productive. It also gives $A_{OL}w_L\leq(I-A_{OO})w_O$. Multiplication by $N_O\geq 0$ yields $N_OA_{OL}w_L\leq w_O$. Therefore
-\begin{equation}
-A_{\mathrm{eff}}w_L\leq A_{LL}w_L+A_{LO}w_O\ll w_L,
-\end{equation}
-which proves productivity of the effective system.
-
-The external columns of the labor balance give $G_O(I-A_{OO})=H_O+G_LA_{LO}$. Solve for $G_O$ and substitute into the retained columns. The resulting equation is $G_L=H_{\mathrm{eff}}+G_LA_{\mathrm{eff}}$, whose unique solution is the displayed formula. Finally, the external production equation gives $x_O=N_O(A_{OL}x_L+y_O)$. Substitution in the retained production equation and in $Hx=H_Lx_L+H_Ox_O$ gives the demand and labor formulas.
-\end{proof}
-
-Effective coefficients include the external production that has been eliminated from the visible boundary. In particular, $H_{\mathrm{eff}}$ is not merely direct labor inside the retained nodes, and nonzero external final demand cannot be discarded.
-
-\begin{theorem}[Boolean boundary reduction]
-Partition $B$ and $D$ in the same way. Define
-\begin{equation}
-\begin{aligned}
-B_{\mathrm{eff}}&=B_{LL}\vee(B_{LO}\odot B_{OO}^*\odot B_{OL}),\\
-D_{\mathrm{eff}}&=D_L\vee(D_O\odot B_{OO}^*\odot B_{OL}).
-\end{aligned}
-\end{equation}
-Then the retained columns of the full capability closure are exactly
-\begin{equation}
-R_L=D_{\mathrm{eff}}\odot B_{\mathrm{eff}}^*.
-\end{equation}
-\end{theorem}
-\begin{proof}
-Consider a labeled path ending in $L$. If it starts in $O$, compress its initial external segment through its first entry into $L$ into a label in $D_{\mathrm{eff}}$; a path starting in $L$ already has a label in $D_L$. Thereafter, each maximal excursion from $L$ through $O$ and back to $L$ becomes one effective edge, while a direct retained edge is left unchanged. This yields a labeled path in the reduced graph. Conversely, each effective label and each effective edge has a witnessing external path. Expanding them and concatenating produces a path in the full graph. These two constructions prove equality, including paths that contain cycles.
-\end{proof}
-
-\section{Exact examples of conditional requirements}
-\begin{example}[Steel, machinery, and a widget]
-Consider three outputs with
-\begin{equation}
-A=\begin{pmatrix}0&10&1\\0&0&1/100\\0&0&0\end{pmatrix},\qquad H=\begin{pmatrix}2&20&1\end{pmatrix}.
-\end{equation}
-Since $A^3=0$, the inverse is $I+A+A^2$. Multiplication gives $G=(2,40,17/5)$. Thus the widget requires $17/5$ occupational hours under these recipes. The first row sum of $A$ is $11$, illustrating why an unscaled norm test is only sufficient, not necessary, for productivity.
-\end{example}
-
-\begin{example}[Development and copies]
-For four outputs, take
-\begin{equation}
-A=\begin{pmatrix}0&0&1/100&10\\0&0&1/100000&1/1000\\0&0&0&0\\0&0&0&0\end{pmatrix},
-\end{equation}
-and $H=(1/50,100,11/1250,1/5)$. Here $A^2=0$, so $G=H(I+A)=(1/50,100,1/100,1/2)$. If a development project uses 800 direct hours, 1000 units of the first input, and $9/5$ units of the second, its fresh requirement is
-\begin{equation}
-800+1000\left(\frac{1}{50}\right)+\frac95(100)=1000.
-\end{equation}
-Producing 1000 copies of the third output in the resulting context adds 10 hours. The combined fresh account is 1010 hours. The development project and the conditional copy requirement remain distinct records.
-\end{example}
-
-\begin{example}[Occupations and shared prerequisites]
-Let
-\begin{equation}
-A=\begin{pmatrix}0&2\\0&0\end{pmatrix},\qquad H=\begin{pmatrix}3&1\\0&2\end{pmatrix}.
-\end{equation}
-Then $G=\left(\begin{smallmatrix}3&7\\0&2\end{smallmatrix}\right)$. Supplied weights $(1,3)$ give scalar requirements $(3,13)$; the second output still requires the occupational vector $(7,2)$.
-
-For a separate four-node diamond, let edges run from node 1 to nodes 2 and 3, then from both to node 4. Give each edge coefficient one and let only node 1 use one direct labor hour. Then $G=(1,1,1,2)$: two material paths contribute additively. A capability directly labeling node 1 propagates to $(1,1,1,1)$, because Boolean union does not duplicate it. Similarly, two projects costing 6 and 8 with one shared prerequisite costing 4 have a distinct-project fresh total of 18, not 22. If that prerequisite result is already satisfied, the missing-project total is 14.
-\end{example}
-
-\section{An optional occupational conversion model}
-The preceding results require no endogenous scalar conversion. We now specify additional nonnegative data: provisioning goods $S\in\mathbb R^{n\times m}_{\geq 0}$, education and training goods $E\in\mathbb R^{n\times m}_{\geq 0}$, and direct teaching labor $U\in\mathbb R^{m\times m}_{\geq 0}$. Let $\Gamma=\operatorname{diag}(\gamma_1,\ldots,\gamma_m)$ with finite $\gamma_i>0$ denote productive lifetimes in the chosen occupational time units. These accounts must be defined without double-counting training goods and direct teaching labor.
-
-Define the ordinary-input and direct-teaching burdens per productive time unit by
+\section{Optional occupational weights}
+For a productive context, supply provisioning goods $S\geq0$, training goods $E\geq0$, direct teaching labor $U\geq0$, and positive finite lifetimes $\Gamma=\operatorname{diag}(\gamma_i)$. The first two matrices are $n\times m$; $U,\Gamma$ are $m\times m$. Define
 \begin{equation}
 F=S+E\Gamma^{-1},\qquad T=U\Gamma^{-1},\qquad M=GF+T.
 \end{equation}
-Equivalently, $M=GS+(GE+U)\Gamma^{-1}$. The column $j$ of $M$ is a declared reproduction burden for one productive unit of occupation $j$. It is a stationary accounting construction, not an instruction to add fictitious rounds of actual labor to a chronological account.
+These data specify reproduction burdens per productive time unit, with goods and direct teaching counted separately. Fix reference occupation $b$. The equal-residual convention requires $\alpha\gg0$, $\kappa>0$, and
+\begin{equation}
+(I-M^{\mathsf T})\alpha=\kappa\mathbf1,\qquad\alpha_b=1.
+\end{equation}
 
-\begin{definition}[Equal-residual normalization]
-Fix a reference occupation $b$. The optional equal-residual assumption asks for weights $\alpha\gg 0$ and a residual $\kappa>0$ such that
+\begin{theorem}[Normalized weights]
+Such a pair exists exactly when $\rho(M)<1$, and then it is unique:
 \begin{equation}
-\alpha-M^{\mathsf T}\alpha=\kappa\mathbf 1,\qquad\alpha_b=1.
+W=(I-M^{\mathsf T})^{-1},\quad\beta=W\mathbf1\geq\mathbf1,\quad
+\alpha=\frac{\beta}{\beta_b},\quad\kappa=\frac1{\beta_b}.
 \end{equation}
-This is a weighting convention imposed on the data, not a consequence of the occupational balance.
-\end{definition}
-
-\begin{theorem}[Existence and uniqueness of normalized conversion]
-For nonnegative $M$, a normalized equal-residual pair exists if and only if $\rho(M)<1$. In that case it is unique. With
-\begin{equation}
-W=(I-M^{\mathsf T})^{-1},\qquad\beta=W\mathbf 1,
-\end{equation}
-the solution is
-\begin{equation}
-\beta\geq\mathbf 1,\qquad\alpha=\frac{\beta}{\beta_b},\qquad\kappa=\frac{1}{\beta_b}.
-\end{equation}
+The ratios $r_{ij}=\alpha_i/\alpha_j=\beta_i/\beta_j$ are independent of the reference. Changing reference to $c$ divides $\alpha$ and $\kappa$ by $\alpha_c$. Equal column sums $M^{\mathsf T}\mathbf1=s\mathbf1$, with $s<1$, give $\alpha=\mathbf1$ and $\kappa=1-s$.
 \end{theorem}
 \begin{proof}
-If $\rho(M)<1$, then $\rho(M^{\mathsf T})<1$ and $W\geq I$ by the productivity theorem. Hence $\beta\geq\mathbf 1$, and $(I-M^{\mathsf T})\beta=\mathbf 1$. Dividing by the positive component $\beta_b$ proves existence. Any other pair must satisfy $\alpha=\kappa\beta$. Its reference equation forces $1=\kappa\beta_b$, proving uniqueness.
-
-Conversely, a positive pair satisfies $M^{\mathsf T}\alpha=\alpha-\kappa\mathbf 1\ll\alpha$. Thus $\alpha$ is a positive witness for $M^{\mathsf T}$. The productivity theorem and invariance of the spectrum under transpose give $\rho(M)<1$.
+Productivity of $M^{\mathsf T}$ gives $W\geq I$. Every solution has $\alpha=\kappa\beta$; normalization forces the displayed pair. Conversely, a positive pair gives $M^{\mathsf T}\alpha\ll\alpha$, proving productivity. Ratios cancel the normalizing denominator. For equal column sums, $\beta=(1-s)^{-1}\mathbf1$ solves the equation uniquely.
 \end{proof}
 
-\begin{proposition}[Ratios, reference changes, and equal column sums]
-The pairwise conversion ratios are
-\begin{equation}
-r_{ij}=\frac{\alpha_i}{\alpha_j}=\frac{\beta_i}{\beta_j}.
-\end{equation}
-They are independent of the reference occupation. Replacing $b$ by $c$ gives $\alpha^{(c)}=\alpha^{(b)}/\alpha_c^{(b)}$. If all column sums of $M$ equal $s<1$, then $\alpha=\mathbf 1$ and $\kappa=1-s$.
-\end{proposition}
-\begin{proof}
-Cancellation of $\beta_b$ proves the ratio and reference formulas. If $M^{\mathsf T}\mathbf 1=s\mathbf 1$, the vector $(1-s)^{-1}\mathbf 1$ solves the equation for $\beta$. Invertibility makes this solution unique. Normalize it at any reference.
-\end{proof}
+This is an additional convention, not an identification of weights with wages. Ordinary productivity is insufficient: $A=0$, $H=S=1$, $E=U=0$ gives $M=1$ and no positive residual.
 
-Ordinary productivity alone does not imply conversion productivity. In one dimension, $A=0$, $H=1$, $S=1$, and $E=U=0$ give $M=1$, for which a positive residual is impossible. More generally, a scalar $M=[\mu]$ with $\mu\geq 1$ cannot satisfy the equal-residual equation with positive weight and residual.
-
-\section{The augmented system and scalar valuation}
-\begin{theorem}[Augmented productivity]
-Assume $A$ is productive, and form
-\begin{equation}
-\mathcal A=\begin{pmatrix}A&F\\H&T\end{pmatrix},\qquad M=HNF+T.
-\end{equation}
-Then $\rho(\mathcal A)<1$ if and only if $\rho(M)<1$. If $Z=(I-M)^{-1}$, the augmented inverse is
+\begin{proposition}[The augmented system]
+For productive $A$, let $\mathcal A=\left(\begin{smallmatrix}A&F\\H&T\end{smallmatrix}\right)$. Then $\mathcal A$ is productive exactly when $M$ is. When these are productive, write $Z=(I-M)^{-1}$; the inverse is
 \begin{equation}
 (I-\mathcal A)^{-1}=\begin{pmatrix}N+NFZHN&NFZ\\ZHN&Z\end{pmatrix}.
 \end{equation}
-\end{theorem}
-\begin{proof}
-If $\mathcal A$ is productive, take a positive witness $(u,z)$. Its inequalities give $Fz\leq(I-A)u$ and $Hu+Tz\ll z$. Multiplication of the first inequality by $N\geq 0$ gives $NFz\leq u$, and therefore $Mz=HNFz+Tz\leq Hu+Tz\ll z$. Thus $M$ is productive.
-
-Conversely, suppose $M$ is productive. All blocks in the proposed inverse are nonnegative. To verify it, use $(I-A)N=N(I-A)=I$ and $(I-M)Z=Z(I-M)=I$. The upper-left block of its left product with $I-\mathcal A$ is $I+FZHN-FZHN=I$; the upper-right block is $FZ-FZ=0$. The lower-left block is $-HN+(I-T-HNF)ZHN=0$, and the lower-right block is $(I-T-HNF)Z=I$. The right product is checked by the same identities, with the factors in their indicated order. Hence the displayed matrix is a nonnegative two-sided inverse. The productivity theorem proves the converse.
-\end{proof}
-
-\begin{proposition}[Unified scalar equations]
-Under the normalized conversion assumptions, let $v=G^{\mathsf T}\alpha$. Then
+The unique normalized scalar account is $v=G^{\mathsf T}\alpha$, equivalently
 \begin{equation}
-\begin{pmatrix}v\\\alpha\end{pmatrix}=\mathcal A^{\mathsf T}\begin{pmatrix}v\\\alpha\end{pmatrix}+\begin{pmatrix}0\\\kappa\mathbf 1\end{pmatrix}.
+\begin{pmatrix}v\\\alpha\end{pmatrix}=\mathcal A^{\mathsf T}\begin{pmatrix}v\\\alpha\end{pmatrix}+\begin{pmatrix}0\\\kappa\mathbf1\end{pmatrix},\qquad\alpha_b=1,
 \end{equation}
-Together with $\alpha_b=1$ and positivity of the conversion pair, these equations determine $v$, $\alpha$, and $\kappa$ uniquely. A project has scalar requirement $V=\alpha^{\mathsf T}(h+Ga)$.
+with $\alpha\gg0$, $\kappa>0$. Projects have scalar requirement $\alpha^{\mathsf T}(h+Ga)$.
 \end{proposition}
 \begin{proof}
-The first block equation is $v=A^{\mathsf T}v+H^{\mathsf T}\alpha$, whose unique solution is $G^{\mathsf T}\alpha$. Substitute this into the second block: $\alpha=F^{\mathsf T}G^{\mathsf T}\alpha+T^{\mathsf T}\alpha+\kappa\mathbf 1=M^{\mathsf T}\alpha+\kappa\mathbf 1$. The normalized conversion theorem proves uniqueness. The project formula is the scalar evaluation of its occupational vector.
+For arbitrary right-hand sides $p,q$, eliminate $u$ from $(I-A)u-Fz=p$ and $-Hu+(I-T)z=q$. This gives $z=Z(q+HNp)$ and $u=N(p+Fz)$, proving the inverse formula and its nonnegativity when $M$ is productive. Conversely, a positive witness $(u,z)$ for $\mathcal A$ gives $NFz\leq u$ and hence $Mz\leq Hu+Tz\ll z$. Finally, eliminating $v$ from the transposed equations gives exactly the equal-residual equation.
 \end{proof}
 
-These block equations connect the two accounts algebraically. They do not identify occupational weights with wages, or assert that labor is an ordinary physical commodity. The optional convention determines a scalar reduction conditional on its provisioning, training, and lifetime data.
+\section{Boundaries and units}
+Partition outputs into nonempty retained nodes $L$ and external nodes $O$, with corresponding blocks of $A$, columns of $H,G,D$, and rows of $F$. All formulas below retain the input-per-output orientation: $A_{LO}$ means retained inputs used by external production. Empty-block cases simply omit the corresponding terms.
 
-\section{Sensitivity, residual errors, and invariance of conversion}
-\begin{proposition}[Conversion derivatives]
-For differentiable coefficient curves at a point where $A$ and $M$ are productive, the inverse-based conversion quantities are differentiable in fixed coordinates. Their differentials satisfy
+\begin{theorem}[Exact boundary reduction]
+If $A$ is productive, so are $A_{OO}$ and $A_{\mathrm{eff}}$ below. Set
 \begin{equation}
-\begin{aligned}
-dM&=dG\,F+G\,dF+dT,\\
-d\beta&=W(dM)^{\mathsf T}\beta,\\
-d\alpha&=\frac{d\beta-\alpha\,d\beta_b}{\beta_b},\\
-dv&=(dG)^{\mathsf T}\alpha+G^{\mathsf T}d\alpha.
-\end{aligned}
-\end{equation}
-\end{proposition}
-\begin{proof}
-The product rule gives $dM$. The inverse map is differentiable on the open set of invertible matrices, so differentiating $(I-M^{\mathsf T})\beta=\mathbf 1$ gives $(I-M^{\mathsf T})d\beta=(dM)^{\mathsf T}\beta$. Multiplication by $W$ proves the second formula. Since $\beta_b\geq 1$, the scalar quotient rule applies to $\alpha=\beta/\beta_b$. A final product rule gives $dv$.
-\end{proof}
-
-If $0\leq M\leq M'$ and $M'$ is productive, then $M$ is productive and $\beta\leq\beta'$, by the nonnegative inverse series. Normalized weights need not be monotone: with reference 1, the change from $M=0$ to $M'=\operatorname{diag}(1/2,0)$ changes $\beta=(1,1)$ to $(2,1)$ and $\alpha=(1,1)$ to $(1,1/2)$.
-
-\begin{proposition}[Residual and ratio bounds]
-Let $\widetilde\beta$ be an approximation and let $r=\mathbf 1-(I-M^{\mathsf T})\widetilde\beta$ be its residual. Then
-\begin{equation}
-\beta-\widetilde\beta=Wr,\qquad |\beta-\widetilde\beta|\leq W|r|.
-\end{equation}
-If positive lower bounds and upper bounds satisfy $0<l_i\leq\beta_i\leq u_i$, then
-\begin{equation}
-\frac{l_i}{u_j}\leq r_{ij}\leq\frac{u_i}{l_j}.
-\end{equation}
-\end{proposition}
-\begin{proof}
-Subtract the approximate equation from the exact one and multiply by $W$. Since $W\geq 0$, the triangle inequality in each finite row sum gives the absolute-value bound. The ratio bounds follow by monotonicity of division by a positive denominator. In particular, a residual bound must account for the size of $W$; a small residual alone is not an absolute error certificate.
-\end{proof}
-
-\begin{proposition}[Conversion under physical units and boundary reduction]
-For the physical-unit change of Section 3, set $S'=P^{-1}S$ and $E'=P^{-1}E$, leaving $U$, $\Gamma$, and the reference fixed. Then $M'=M$, $\alpha'=\alpha$, and $v'=Pv$; scalar final-demand totals are unchanged.
-
-For the boundary reduction of Section 7, partition $F$ into $F_L,F_O$ and define
-\begin{equation}
-F_{\mathrm{eff}}=F_L+A_{LO}N_OF_O,\qquad T_{\mathrm{eff}}=T+H_ON_OF_O.
+N_O=(I-A_{OO})^{-1},\quad
+A_{\mathrm{eff}}=A_{LL}+A_{LO}N_OA_{OL},\quad
+H_{\mathrm{eff}}=H_L+H_ON_OA_{OL}.
 \end{equation}
 Then
 \begin{equation}
-G_LF_{\mathrm{eff}}+T_{\mathrm{eff}}=GF+T=M.
+G_L=H_{\mathrm{eff}}(I-A_{\mathrm{eff}})^{-1},\qquad
+G_O=(H_O+G_LA_{LO})N_O.
 \end{equation}
-Thus exact elimination preserves the conversion matrix, normalized weights, and ratios, as well as scalar values for retained outputs.
-\end{proposition}
-\begin{proof}
-For physical units, $F'=P^{-1}F$ and $G'=GP$, so $G'F'+T=GF+T$. Uniqueness gives the same weights, and $v'=(G')^{\mathsf T}\alpha=Pv$. Since $y'=P^{-1}y$ and $P$ is diagonal, $(v')^{\mathsf T}y'=v^{\mathsf T}y$.
-
-For boundary reduction, expand the left-hand side and collect terms containing $F_O$:
+For final demand $(y_L,y_O)$, $x_L=(I-A_{\mathrm{eff}})^{-1}(y_L+A_{LO}N_Oy_O)$ and total labor is $H_{\mathrm{eff}}x_L+H_ON_Oy_O$. Conversion is preserved by
+\begin{equation}
+F_{\mathrm{eff}}=F_L+A_{LO}N_OF_O,\quad T_{\mathrm{eff}}=T+H_ON_OF_O,\quad
+G_LF_{\mathrm{eff}}+T_{\mathrm{eff}}=M.
+\end{equation}
+Capability closure is preserved by the Boolean formulas
 \begin{equation}
 \begin{aligned}
-G_LF_{\mathrm{eff}}+T_{\mathrm{eff}}&=G_LF_L+(H_O+G_LA_{LO})N_OF_O+T\\
-&=G_LF_L+G_OF_O+T=M.
+B_{\mathrm{eff}}&=B_{LL}\vee(B_{LO}\odot B_{OO}^*\odot B_{OL}),\\
+D_{\mathrm{eff}}&=D_L\vee(D_O\odot B_{OO}^*\odot B_{OL}),\qquad
+R_L=D_{\mathrm{eff}}\odot B_{\mathrm{eff}}^*.
 \end{aligned}
 \end{equation}
-The last equality uses the full external labor formula. All remaining conclusions follow from equality of $M$ and of the retained labor columns.
+\end{theorem}
+\begin{proof}
+A witness $(w_L,w_O)$ for $A$ gives $A_{OO}w_O\ll w_O$ and $N_OA_{OL}w_L\leq w_O$. Therefore $A_{\mathrm{eff}}w_L\leq A_{LL}w_L+A_{LO}w_O\ll w_L$. Solve the external labor equation for $G_O$ and substitute into the retained equation. The production identity $x_O=N_O(A_{OL}x_L+y_O)$ gives the demand formulas. Substitution gives $G_LF_{\mathrm{eff}}+T_{\mathrm{eff}}=G_LF_L+G_OF_O+T=M$.
+
+For capabilities, compress each external excursion of a path into an effective edge, and any initial external labeled segment into an effective label. Expanding those segments reverses the construction. Thus full and reduced graphs have exactly the same labeled reachability on $L$.
 \end{proof}
 
-The effective teaching term includes labor embodied in eliminated training inputs. Deleting external provisioning or training rows without these corrections can change the conversion ratios.
+Consequently the reduced system preserves normalized weights, ratios, and retained scalar values whenever conversion exists. Effective coefficients include eliminated labor and inputs; simply deleting external rows, or external final demand, is not this reduction.
 
-\begin{proposition}[Occupational time units]
-Let $J=\operatorname{diag}(t_1,\ldots,t_m)$ with $t_i>0$, where one new unit of occupation $i$ contains $t_i$ old units. Keep physical output units fixed and transform
+\begin{proposition}[Changes of units]
+Assume $A$ productive, and $M$ productive when weights are used. For positive diagonal physical-unit matrix $P$, set $A'=P^{-1}AP$, $H'=HP$, $y'=P^{-1}y$, $S'=P^{-1}S$, and $E'=P^{-1}E$, leaving $U,\Gamma$ fixed. Then
+\begin{equation}
+N'=P^{-1}NP,\quad G'=GP,\quad G'y'=Gy,\quad M'=M,\quad v'=Pv.
+\end{equation}
+Productivity, support, conversion weights, and scalar totals are preserved.
+
+If one new time unit in occupation $i$ is $t_i>0$ old units, put $J=\operatorname{diag}(t_i)$ and keep physical units fixed. Use
 \begin{equation}
 H'=J^{-1}H,\quad S'=SJ,\quad E'=E,\quad U'=J^{-1}U,\quad\Gamma'=J^{-1}\Gamma.
 \end{equation}
-Then
+Then $G'=J^{-1}G$, $F'=FJ$, $T'=J^{-1}TJ$, $M'=J^{-1}MJ$, and the covariant weights $\alpha'=J\alpha$ satisfy
 \begin{equation}
-G'=J^{-1}G,\quad F'=FJ,\quad T'=J^{-1}TJ,\quad M'=J^{-1}MJ.
+\alpha'-(M')^{\mathsf T}\alpha'=\kappa J\mathbf1,\qquad
+(G')^{\mathsf T}\alpha'=G^{\mathsf T}\alpha.
 \end{equation}
-The covariant weights $\alpha'=J\alpha$ preserve $v$ and satisfy
-\begin{equation}
-\alpha'-(M')^{\mathsf T}\alpha'=\kappa J\mathbf 1,\qquad (G')^{\mathsf T}\alpha'=G^{\mathsf T}\alpha.
-\end{equation}
-To restore reference component 1 at occupation $b$, divide $\alpha'$ and $\kappa$ by $t_b$, retaining the transformed residual source $J\mathbf 1$. Scalar values are then divided by $t_b$, and ratios per new time unit satisfy $r'_{ij}=(t_i/t_j)r_{ij}$.
+Rebasing at $b$ divides $\alpha'$ and $\kappa$ by $t_b$ and divides scalar values by $t_b$, keeping source $J\mathbf1$. Ratios per new unit are $(t_i/t_j)r_{ij}$.
 \end{proposition}
 \begin{proof}
-Because $J$ and $\Gamma$ are diagonal, $(\Gamma')^{-1}=\Gamma^{-1}J$. Substitute this identity in $F'$ and $T'$, and use $G'=J^{-1}G$, to obtain the similarity formula for $M'$. Since $J^{\mathsf T}=J$, one has $(M')^{\mathsf T}=JM^{\mathsf T}J^{-1}$. Thus the residual equation transforms by left multiplication by $J$, and the scalar account is unchanged by cancellation. The reference and ratio formulas follow by scalar division.
+Substitute $I-A'=P^{-1}(I-A)P$ for physical units. For time units use $(\Gamma')^{-1}=\Gamma^{-1}J$ and $(M')^{\mathsf T}=JM^{\mathsf T}J^{-1}$. The formulas follow by cancellation; positive diagonal factors preserve support.
 \end{proof}
 
-An unequal change of occupational time units must therefore transform the residual source. Imposing a fresh numerical all-ones source after such a change would assert equal residuals per different time units and would be a different weighting assumption.
+The residual source must change with occupational time units. Keeping a numerical all-ones source after unequal rescaling would impose a different weighting convention.
 
-\section{A complete conversion example and identification limits}
-Consider six outputs and two occupations. Let the only nonzero entry of $A$ be $A_{34}=2$, and set
+\section{Changes and error bounds}
+\begin{proposition}[Finite changes and derivatives]
+For two productive systems, write $N'=(I-A')^{-1}$. Then
 \begin{equation}
-H=\begin{pmatrix}1&0&3&1&1/100&1/5\\0&1&0&2&1/500&1/10\end{pmatrix}.
+G'-G=\bigl(H'-H+G(A'-A)\bigr)N'.
 \end{equation}
-Since $A^2=0$, the labor account is
+If $0\leq A'\leq A$ and $0\leq H'\leq H$, productivity of $A$ implies that of $A'$ and $G'\leq G$. For differentiable coefficients at a productive point, in fixed coordinates,
 \begin{equation}
-G=\begin{pmatrix}1&0&3&7&1/100&1/5\\0&1&0&2&1/500&1/10\end{pmatrix}.
+dN=N\,dA\,N,\qquad dG=(dH+G\,dA)N,\qquad
+\frac{\partial G_{rj}}{\partial A_{ik}}=G_{ri}N_{kj}.
 \end{equation}
-Let the first row of $S$ be $(1/5,1/5)$ and all its other rows be zero. Let the first two rows of $E$ be $(0,2000)$ and $(400,3000)$, with its other rows zero, and take
+When conversion is productive, also
 \begin{equation}
-U=\begin{pmatrix}0&0\\600&2000\end{pmatrix},\qquad\Gamma=20000I.
+\begin{aligned}
+dM&=dG\,F+G\,dF+dT,\qquad d\beta=W(dM)^{\mathsf T}\beta,\\
+d\alpha&=\frac{d\beta-\alpha\,d\beta_b}{\beta_b},\qquad dv=(dG)^{\mathsf T}\alpha+G^{\mathsf T}d\alpha.
+\end{aligned}
 \end{equation}
-Direct substitution gives
-\begin{equation}
-M=\begin{pmatrix}1/5&3/10\\1/20&1/4\end{pmatrix},\qquad W=\begin{pmatrix}50/39&10/117\\20/39&160/117\end{pmatrix}.
-\end{equation}
-Multiplication verifies $(I-M^{\mathsf T})W=W(I-M^{\mathsf T})=I$. Since $W\geq 0$, conversion is productive. Its reference-1 normalization is
-\begin{equation}
-\beta=\begin{pmatrix}160/117\\220/117\end{pmatrix},\qquad\alpha=\begin{pmatrix}1\\11/8\end{pmatrix},\qquad\kappa=\frac{117}{160}.
-\end{equation}
-Indeed, $M^{\mathsf T}\alpha=(43/160,103/160)^{\mathsf T}$, so both components of $\alpha-M^{\mathsf T}\alpha$ equal $117/160$. The scalar output requirements are
-\begin{equation}
-v=\begin{pmatrix}1&11/8&3&39/4&51/4000&27/80\end{pmatrix}^{\mathsf T}.
-\end{equation}
-A project with ordinary inputs $a=(5,2,0,0,0,0)^{\mathsf T}$ and direct labor $h=(10,20)^{\mathsf T}$ has $\ell=(15,22)^{\mathsf T}$ and scalar requirement
-\begin{equation}
-V=15+\frac{11}{8}(22)=\frac{181}{4}.
-\end{equation}
+\end{proposition}
+\begin{proof}
+Subtract the balance equations and multiply by $N'$ to obtain the finite identity. A witness for $A$ is a witness for $A'\leq A$; the identity then gives $G'\leq G$. The inverse map is differentiable on the open set of invertible matrices. Differentiating $(I-A)N=I$ gives $dN$, and the product rule gives $dG$; setting $dA=e_i e_k^{\mathsf T}$ gives the coefficient formula with $H$ fixed. Differentiate $(I-M^{\mathsf T})\beta=\mathbf1$, then apply the product and quotient rules, using $\beta_b>0$.
+\end{proof}
 
-This example also displays three limits on identification. First, suppose the first two outputs are removed from the reporting boundary. They have no feedback through $A$, but their provisioning and training burdens cannot be deleted. Doing so would leave only $T=\left(\begin{smallmatrix}0&0\\3/100&1/10\end{smallmatrix}\right)$ and would produce the ratio $100/93$ instead of $11/8$. The effective-boundary formulas retain the omitted burdens and preserve the correct $M$.
+These derivatives concern the inverse formulas, not changes of catalogue or feasibility regime. Ordered productive matrices $M\leq M'$ give $\beta\leq\beta'$ by the nonnegative series, but normalization can reverse an inequality: $M=0$ and $M'=\operatorname{diag}(1/2,0)$ give reference-1 weights $(1,1)$ and $(1,1/2)$.
 
-Second, changing the second occupational unit from one hour to an eight-hour day gives $J=\operatorname{diag}(1,8)$. The transformed weights are $(1,11)^{\mathsf T}$ and the transformed residual source is $(1,8)^{\mathsf T}$; scalar output requirements are unchanged. The numerical weight 11 is per eight-hour unit, not per hour.
+\begin{proposition}[Certified approximations]
+Assume $A$ productive, and $M$ productive for the conversion bounds. Let $P=\operatorname{diag}(w)$ for a positive witness of $A$, and put $\eta=\|P^{-1}AP\|_\infty<1$. With $G^{[k]}=H\sum_{i=0}^{k}A^i$, one has $0\leq G^{[k]}\leq G$ and
+\begin{equation}
+\|(G-G^{[k]})P\|_\infty\leq\|HP\|_\infty\frac{\eta^{k+1}}{1-\eta}.
+\end{equation}
+For an approximation $\widetilde\beta$, let $r=\mathbf1-(I-M^{\mathsf T})\widetilde\beta$. Then
+\begin{equation}
+\beta-\widetilde\beta=Wr,\qquad |\beta-\widetilde\beta|\leq W|r|.
+\end{equation}
+Bounds $0<l_i\leq\beta_i\leq u_i$ imply $l_i/u_j\leq r_{ij}\leq u_i/l_j$.
+\end{proposition}
+\begin{proof}
+After scaling, the labor error is the tail $HP\sum_{i=k+1}^{\infty}(P^{-1}AP)^i$. Bound its norm by the scalar geometric tail. Subtracting the approximate conversion equation from the exact one gives $Wr$; use $W\geq0$ and the triangle inequality. The ratio bounds follow by division by positive bounds.
+\end{proof}
 
-Third, the same reproduction matrix does not select the residual convention. If one replaces the all-ones source by $q=(1,2)^{\mathsf T}$ in $(I-M^{\mathsf T})\alpha=\kappa q$, the positive reference-1 solution becomes $\alpha=(1,38/17)^{\mathsf T}$ and $\kappa=117/170$. This follows by multiplying $Wq=(170/117,380/117)^{\mathsf T}$ and normalizing. Thus uniqueness under a specified convention does not prove that the convention is uniquely warranted by the data.
+Thus a small residual needs the factor $W$ to certify accuracy. An unscaled row-sum test is only sufficient for productivity: a strictly upper triangular matrix is nilpotent regardless of how large its entries are.
 
-Even with no education or teaching burden, provisioning can yield unequal weights. For $A=0$, $H=I$, $E=U=0$, and $S=\operatorname{diag}(1/5,2/5)$, one obtains $\beta=(5/4,5/3)^{\mathsf T}$ and reference-1 weights $(1,4/3)^{\mathsf T}$. Equal quantities of ordinary occupational hours are therefore not automatically assigned equal scalar weights by this optional model.
+\section{Small examples}
+For two outputs and two occupations, take
+\begin{equation}
+A=\begin{pmatrix}0&2\\0&0\end{pmatrix},\quad
+H=\begin{pmatrix}3&1\\0&2\end{pmatrix},\quad
+G=H(I+A)=\begin{pmatrix}3&7\\0&2\end{pmatrix}.
+\end{equation}
+The second output requires occupational hours $(7,2)^{\mathsf T}$; supplied weights $(1,3)^{\mathsf T}$ assign it scalar requirement 13.
 
-\section{Provenance and verification}
-This article reorganizes the mathematical results of the supplied paper, Research as Production Context, audited revision of the edition dated 21 October 2026. The accompanying formal development uses Lean 4.35.0 and Mathlib v4.35.0. It contains 191 named theorems and lemmas; its dependency audit covers 477 project declarations, allowing only the standard logical axioms used by the library. It contains no proof placeholders or added mathematical axioms.
+For a diamond with unit coefficients from node 1 to nodes 2 and 3, and from both to node 4, let only node 1 use one direct hour. Material requirements are $(1,1,1,2)$ while a capability labeling node 1 propagates to $(1,1,1,1)$. Material paths add; reusable labels combine by OR. Similarly, development costing 1000 hours followed by 1000 copies at $1/100$ hour each totals 1010 hours, while each conditional copy requirement remains $1/100$.
 
-The conventional proofs here are an exposition; the source project is the machine-checked certificate. Its README records the correspondence to the supplied paper. Empirical validity, data quality, feasible schedules, project success, and the choice of a residual weighting convention remain outside these mathematical conclusions.
+For conversion, take
+\begin{equation}
+M=\begin{pmatrix}1/5&3/10\\1/20&1/4\end{pmatrix},\qquad
+W=\begin{pmatrix}50/39&10/117\\20/39&160/117\end{pmatrix}.
+\end{equation}
+Direct multiplication verifies $W=(I-M^{\mathsf T})^{-1}\geq0$, giving
+\begin{equation}
+\beta=\frac1{117}\begin{pmatrix}160\\220\end{pmatrix},\qquad
+\alpha=\begin{pmatrix}1\\11/8\end{pmatrix},\qquad\kappa=\frac{117}{160}.
+\end{equation}
+A project requiring $(15,22)^{\mathsf T}$ hours has scalar requirement $15+(11/8)22=181/4$. Changing the second time unit to eight hours gives weights $(1,11)^{\mathsf T}$ and residual source $(1,8)^{\mathsf T}$, preserving scalar requirements.
+
+The weighting assumption matters. Replacing the residual source by $c=(1,2)^{\mathsf T}$ gives $Wc=(170,380)^{\mathsf T}/117$, hence reference-1 weight $38/17$ and residual $117/170$. Omitting goods burdens and using only $T=\left(\begin{smallmatrix}0&0\\3/100&1/10\end{smallmatrix}\right)$ would instead give weight $100/93$. Equal clock hours alone also need not receive equal weights: $A=0$, $H=I$, $E=U=0$, and $S=\operatorname{diag}(1/5,2/5)$ give $\alpha=(1,4/3)^{\mathsf T}$.
+
+\section{Verification note}
+This exposition consolidates the results of the supplied Research as Production Context, audited edition dated 21 October 2026. The accompanying Lean 4.35.0 and Mathlib v4.35.0 development contains 191 named theorems and lemmas, with 477 declarations covered by its axiom audit and no proof placeholders. The source project is the formal certificate; the README maps the results. Empirical validity and the choice of weighting convention remain separate from the proved identities.
 \end{document}
