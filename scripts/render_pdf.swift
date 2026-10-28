@@ -151,8 +151,8 @@ newPage("", cover: true)
 pages[0].fills.append(Fill(rect: CGRect(x: left, y: 76, width: 46, height: 4), color: blue))
 y = 110
 paragraph(attr("FORMAL PROOF / VERIFIED SOURCE EDITION", 10, "Helvetica-Bold", blue), gap: 24)
-paragraph(attr("Research as\nProduction Context", 31, "Helvetica-Bold"), gap: 15, leading: 37)
-paragraph(attr("Conditional labor requirements, reusable knowledge,\nand labor-type conversion ratios", 14, "Helvetica", gray), gap: 35, leading: 20)
+paragraph(attr(input.title, 31, "Helvetica-Bold"), gap: 15, leading: 37)
+paragraph(attr("Exact event accounting, conditional labor requirements,\npolicy formulas, and execution contracts", 14, "Helvetica", gray), gap: 35, leading: 20)
 paragraph(attr("Lean 4.35.0 · Mathlib v4.35.0", 13, "Helvetica-Bold"), gap: 22)
 let cardTop = y
 pages[0].fills.append(Fill(rect: CGRect(x: left, y: cardTop, width: bodyWidth, height: 82), color: pale))
@@ -162,7 +162,7 @@ for (i, item) in [("\(input.statementCount)", "THEOREMS & LEMMAS"), ("\(input.so
     put(attr(item.1, 8, "Helvetica-Bold", gray), x: x, top: cardTop + 53)
 }
 y = cardTop + 107
-paragraph(attr("This edition contains the complete Lean proof source, auxiliary lemmas, exact examples, and the axiom audit. A guide connects the formal results to the original audited paper.", 11), gap: 17, leading: 17)
+paragraph(attr("This edition contains the complete Lean specification and proof source, exact examples, and the axiom audit. The guide maps v6.2 equations to definitions and proofs and identifies the remaining runtime obligations.", 11), gap: 17, leading: 17)
 paragraph(attr("Verification: lake --wfail build passed. The dependency audit permits only propext, Classical.choice, and Quot.sound. No additional axioms or proof placeholders occur in the proof library.", 10.4), gap: 17, leading: 16)
 paragraph(attr("The formal results are conditional on their stated mathematical assumptions. Their economic interpretation and the model’s empirical validity are separate questions.", 10.4, "Helvetica", gray), gap: 14, leading: 16)
 put(attr("Generated " + input.date, 9, "Helvetica", gray), top: 746)
@@ -195,6 +195,12 @@ for raw in readmeLines {
         flush()
         let title = String(raw.dropFirst(3))
         beginSection(title, "Guide")
+        continue
+    }
+    if raw.hasPrefix("### ") {
+        flush()
+        room(45)
+        paragraph(attr(String(raw.dropFirst(4)), 14, "Helvetica-Bold"), gap: 10, leading: 20)
         continue
     }
     if raw.hasPrefix("| ") {
@@ -285,39 +291,60 @@ for source in input.config { sourceListing(source, index: 0, group: "Configurati
 beginSection("Snapshot provenance", "Configuration")
 paragraph(inline("The listing contains all \(input.sources.count) Lean source files (\(input.lineCount) original lines), with no omitted proof bodies. All \(input.statementCount) named theorem and lemma declarations are included. The typesetting adds page furniture, line numbers, color, and wrapping only."))
 paragraph(inline("Toolchain: `\(input.toolchain)`. The dependency versions are recorded in the reproduced Lake manifest. The source snapshot was built successfully using `lake --wfail build` immediately before export."))
-paragraph(inline("The build’s axiom audit covered \(input.auditCount) project declarations, including generated declarations. The permitted foundations are `propext`, `Classical.choice`, and `Quot.sound`. The separate Python verification bundle described in the original paper is not the Lean proof suite."))
-paragraph(attr("Original audited paper / SHA-256", 10, "Helvetica-Bold"))
+paragraph(inline("The build’s axiom audit covered \(input.auditCount) project declarations, including generated declarations. The permitted foundations are `propext`, `Classical.choice`, and `Quot.sound`. The PDF’s inherited Python checks are separate evidence; this library does not certify a GPU engine."))
+paragraph(attr("Supplied v6.2 model PDF / SHA-256", 10, "Helvetica-Bold"))
 paragraph(attr(input.paperHash, 8, "Menlo-Regular"), leading: 13)
 paragraph(attr("Lean source snapshot / SHA-256", 10, "Helvetica-Bold"))
 paragraph(attr(input.bundleHash, 8, "Menlo-Regular"), leading: 13)
 paragraph(attr("The source snapshot digest hashes each relative file path, a NUL byte, its original UTF-8 bytes, and a NUL byte, in listing order. Per-file hashes appear after each listing.", 9.5), leading: 14)
 paragraph(inline("To reproduce this document on macOS, run `python3 scripts/export_pdf.py`. The script verifies the build, snapshots the source, and renders through CoreText and PDFKit. The PDF’s source text is then checked for missing glyphs and extraction fidelity."))
 
-// Fill the contents page once all section destinations are known.
-var toc = Page(label: "Contents")
-toc.text.append(TextRun(text: attr("Contents", 25, "Helvetica-Bold"), x: left, top: 70, code: false))
-toc.text.append(TextRun(text: attr("Clickable PDF bookmarks provide the same section navigation.", 9.6, "Helvetica", gray), x: left, top: 109, code: false))
-var ty: CGFloat = 147
-var lastGroup = ""
-for section in sections {
-    if section.group != lastGroup {
-        if !lastGroup.isEmpty { ty += 10 }
-        toc.text.append(TextRun(text: attr(section.group.uppercased(), 8.3, "Helvetica-Bold", blue), x: left, top: ty, code: false))
-        ty += 20
-        lastGroup = section.group
+// Paginate the contents, then shift destinations by the inserted page count.
+// Nested simulator modules make the old single-page contents insufficient.
+func makeContents(_ entries: [Section]) -> [Page] {
+    func emptyContents() -> Page {
+        var page = Page(label: "Contents")
+        page.text.append(TextRun(text: attr("Contents", 25, "Helvetica-Bold"), x: left, top: 70, code: false))
+        page.text.append(TextRun(text: attr("Clickable PDF bookmarks provide the same section navigation.", 9.6, "Helvetica", gray), x: left, top: 109, code: false))
+        return page
     }
-    precondition(ty < bottom - 15, "Contents exceeded its reserved page")
-    toc.text.append(TextRun(text: attr(section.title, 9.7), x: left, top: ty, code: false))
-    toc.text.append(TextRun(text: attr(String(section.page + 1), 9.7, "Helvetica", gray), x: right - 22, top: ty, code: false))
-    ty += 18
+    var result: [Page] = []
+    var toc = emptyContents()
+    var ty: CGFloat = 147
+    var lastGroup = ""
+    for section in entries {
+        let titleLines = lines(attr(section.title, 9.7), width: bodyWidth - 40)
+        let groupHeight: CGFloat = section.group == lastGroup ? 0 : 30
+        if ty + groupHeight + CGFloat(titleLines.count) * 18 > bottom - 15 {
+            result.append(toc)
+            toc = emptyContents()
+            ty = 147
+            lastGroup = ""
+        }
+        if section.group != lastGroup {
+            if !lastGroup.isEmpty { ty += 10 }
+            toc.text.append(TextRun(text: attr(section.group.uppercased(), 8.3, "Helvetica-Bold", blue), x: left, top: ty, code: false))
+            ty += 20
+            lastGroup = section.group
+        }
+        toc.text.append(TextRun(text: attr(String(section.page + 1), 9.7, "Helvetica", gray), x: right - 22, top: ty, code: false))
+        for line in titleLines {
+            toc.text.append(TextRun(text: line, x: left, top: ty, code: false))
+            ty += 18
+        }
+    }
+    result.append(toc)
+    return result
 }
-pages[contentsPage] = toc
+let extraContentsPages = makeContents(sections).count - 1
+sections = sections.map { Section(title: $0.title, page: $0.page + extraContentsPages, group: $0.group) }
+pages.replaceSubrange(contentsPage...contentsPage, with: makeContents(sections))
 
 // CoreText handles Unicode fallback fonts and embeds searchable text in the PDF.
 var box = CGRect(x: 0, y: 0, width: width, height: height)
 let rawURL = work.appendingPathComponent("raw.pdf")
 guard let context = CGContext(rawURL as CFURL, mediaBox: &box, [
-    kCGPDFContextTitle: "Research as Production Context — Lean Proof",
+    kCGPDFContextTitle: "\(input.title) — Lean Formalization",
     kCGPDFContextSubject: "Complete verified Lean 4.35.0 formalization and source guide",
     kCGPDFContextCreator: "CoreText / scripts/export_pdf.py",
 ] as CFDictionary) else { fatalError("Could not create PDF") }
@@ -350,7 +377,7 @@ for (i, page) in pages.enumerated() {
         context.fill(CGRect(x: rect.minX, y: height - rect.maxY, width: rect.width, height: rect.height))
     }
     if !page.isCover {
-        draw(TextRun(text: attr("RESEARCH AS PRODUCTION CONTEXT", 7.5, "Helvetica-Bold", gray), x: left, top: 29, code: false), page: i)
+        draw(TextRun(text: attr(input.title.uppercased(), 7.5, "Helvetica-Bold", gray), x: left, top: 29, code: false), page: i)
         let label = attr(page.label, 7.5, "Helvetica", gray)
         let lw = CGFloat(CTLineGetTypographicBounds(CTLineCreateWithAttributedString(label), nil, nil, nil))
         draw(TextRun(text: label, x: right - lw, top: 29, code: false), page: i)

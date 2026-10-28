@@ -4,6 +4,7 @@ public import MarxLeanProof.BooleanBoundary
 public import MarxLeanProof.Sensitivity
 public import MarxLeanProof.Truncation
 public import MarxLeanProof.Examples
+public import MarxLeanProof.Simulator.Examples
 public import Lean.Util.CollectAxioms
 
 /-! This command runs during compilation and inspects transitive dependencies.

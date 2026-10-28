@@ -1,11 +1,19 @@
-# Research as Production Context — Lean formalization
+# Unified Economic Simulator v6.2 — Lean formalization
 
-This project formalizes the conditional mathematical results in
-[`research_context_formula_audited.pdf`](research_context_formula_audited.pdf),
-including its audited conversion appendix, using **Lean 4.35.0** and
-**Mathlib v4.35.0**. The original PDF is unchanged.
+This project formalizes the mathematical contracts in
+[`Unified_Economic_Simulator_Formal_Model_v6_2_Explained_GPU.pdf`](Unified_Economic_Simulator_Formal_Model_v6_2_Explained_GPU.pdf)
+(27 October 2026), using **Lean 4.35.0** and **Mathlib v4.35.0**. The new
+`Research.Simulator` namespace extends the existing `Research` library without
+changing its theorems. The source PDF is unchanged.
 
-The conventional mathematical exposition is
+The update covers exact event accounting, production packets, fractional claims,
+sparse analytical equations, certified error bounds, policy formulas, dated
+financing, household support and a conditional proof of safe event reordering.
+It is a Lean specification and proof library, not a running economic simulator or
+a GPU implementation. The correspondence table below distinguishes definitions,
+proved properties and implementation obligations.
+
+The earlier research-accounting exposition remains available as
 [`research_context_mathematical_paper.pdf`](research_context_mathematical_paper.pdf),
 with consolidated theorem statements, prose proofs, equations, and small examples. Its editable
 LaTeX source is
@@ -23,6 +31,10 @@ audit. For a new checkout with Elan installed, run `lake exe cache get` before
 the build to fetch Mathlib's compiled artifacts. Dependencies are pinned in
 `lean-toolchain` and `lake-manifest.json`.
 
+On macOS, `python3 scripts/export_pdf.py` verifies and exports the complete
+current library to `unified_economic_simulator_v6_2_lean_proof.pdf`, including
+the nested simulator modules, source hashes and the coverage guide.
+
 Use the library with:
 
 ```lean
@@ -35,12 +47,99 @@ open scoped Research
 #check Research.equalResidual_iff_spectral
 #check Research.Capability.finite_eq_closure
 #check Research.weighted_labor_truncation
+#check Research.Simulator.coupled_productive_iff
+#check Research.Simulator.planValue_eq_hours
+#check Research.Simulator.weighted_residual_bound
+#check Research.Simulator.safeReorder_execute
 ```
 
 `unified_unique` proves uniqueness of the occupational account and the normalized
 conversion pair together. `equalResidual_iff_spectral` proves that the conversion
 pair exists uniquely exactly when the nonnegative reproduction matrix has
 spectral radius below one.
+
+## Correspondence with v6.2
+
+Names in this table are in `Research.Simulator` unless otherwise qualified.
+Equation numbers refer to the supplied 37-page reader's edition. Its S9–S11
+labels retain the numbering from v6.1.
+
+| PDF sections / equations | Definitions and proved properties |
+| --- | --- |
+| §2.2; 2.1: labeled analytical comparators | [Analytics.lean](MarxLeanProof/Simulator/Analytics.lean): `surplusComparator` and `comparatorRate`; the rate is unavailable for a nonpositive requirement. Population, classification, time period and comparator convention remain supplied context. |
+| §§3, 5; 5.1–5.3: units, complete events and payments | [Ledger.lean](MarxLeanProof/Simulator/Ledger.lean): `Coordinate`, positive rational `Quantum`, signed `post`; `post_conserves` for balanced instrument legs; `Bundle.Feasible` checks grouped gross debits and a scenario-supplied authorization predicate; `Bundle.accepted`, `.rejected`, `resolve_rejected`; separate cross-bank deposit and reserve conservation. |
+| §6.1; 6.2–6.3: exact production packets | [Packets.lean](MarxLeanProof/Simulator/Packets.lean): denominator LCM, positivity, divisibility/minimal-common-multiple property and `packetTicks_exact`; `le_packetCount_iff` proves the packet count is the greatest feasible count under the plan and every listed gross resource bound, including zero-input and empty-resource cases. |
+| §6.2; 6.4–6.6: fractional obligations | [Ledger.lean](MarxLeanProof/Simulator/Ledger.lean): `Claim` has a positive denominator; decomposition, accrual, permitted settlement, `Claim.settle_conserves` and `.settle_remainder`. The cash transfer is a separate accepted event. |
+| §7.1; 7.1–7.3: bounded policies, grid quotes, observations | [Policies.lean](MarxLeanProof/Simulator/Policies.lean): clipping, affine blending, missing-observation branch, exact rational quote grids; `quoteTicks_legal` proves floor/cap compliance. Empty legal intervals return `none`. |
+| §§7.2–7.3; 7.4: nonlinear policies and keyed draws | [Policies.lean](MarxLeanProof/Simulator/Policies.lean): real hazard/sigmoid definitions and hazard bounds. [Execution.lean](MarxLeanProof/Simulator/Execution.lean): logical `DrawKey`, exact floored threshold, zero/one endpoint proofs. SHA-256 serialization and GPU-D1 lookup tables are implementation obligations. |
+| §8; 8.1–8.4: goods requirements | [Analytics.lean](MarxLeanProof/Simulator/Analytics.lean): certificate-requiring `solve`, fixed-point identity, uniqueness and nonnegativity; existing `Research.Productive.scalar_fixed`, `.scalar_unique` prove the external-weight goods equation. |
+| §9; 9.1–9.5: optional occupational closure | [Analytics.lean](MarxLeanProof/Simulator/Analytics.lean): per-hour goods/training formulas, `coupledOperator`, simultaneous `coupledStep`, equivalence with the four block products, `coupled_reduction`, `coupled_productive_iff`, `coupled_spectral_iff`, `coupled_beta_ge_one`, and `normalized_coupled`. Goods admissibility is retained. Existing conversion proofs provide the unique positive normalized weights. |
+| §10; 10.1–10.4: research attempts and plans | [Analytics.lean](MarxLeanProof/Simulator/Analytics.lean): `researchValues`, two-dot-product `planValue`, and `planValue_eq_hours`. Existing inventory and historical research identities remain in [Accounting.lean](MarxLeanProof/Accounting.lean); historical discovery costs are not added to subsequent product requirements. |
+| §11; 11.1–11.4: certified accuracy and unavailable results | [Solver.lean](MarxLeanProof/Simulator/Solver.lean): `weightedMax`, `weighted_residual_bound`, `productiveOfContraction`, and `normalization_bounds`, including zero goods-value lower bounds. `Diagnostic` distinguishes missing data, inapplicability, inadmissibility and unresolved accuracy; `cachedValue` rejects a mismatched context version. |
+| §12; 12.1–12.2: capability and missing-project closure | Existing `Research.Capability.finite_eq_closure`, `.finite_missing` and related support/boundary proofs are retained. [Execution.lean](MarxLeanProof/Simulator/Execution.lean) separately represents discovery, mastery, permission, adoption, resources, time and authority in `Readiness.Executable`. Closure alone is not a readiness proof. |
+| §13; S9.1–S9.4: households and work capacity | [Policies.lean](MarxLeanProof/Simulator/Policies.lean): need deficits with a zero-need branch and proved bounds, participation/time availability, health and fatigue formulas. Inputs represent delivered services and executed activities. |
+| §14; S9.5–S9.10: firms, equipment, natural stocks, research | [Policies.lean](MarxLeanProof/Simulator/Policies.lean): demand smoothing, proposed starts, machine capacity/condition, nonincreasing lifetime service, renewable-stock bounds, price candidates, research effort scale, success hazard and exposure. Zero research effort has zero success probability. |
+| §15; S10.1–S10.9: payroll and bargaining | [Policies.lean](MarxLeanProof/Simulator/Policies.lean): rational hinge taxes, net increments and their cross-employer telescoping identity, affine bracket inverse with correctness proof, directional wage grids, employer ceiling, household anchor/refusal factor, bargaining weight and second offer. The selected bracket and positive marginal slope remain explicit preconditions of inversion. |
+| §16; S11.1–S11.5: finance and collective support | [Finance.lean](MarxLeanProof/Simulator/Finance.lean): lending caps with a liquidity bound, prefix-based `openingNeed` and exact cushion equivalence, financing gap, replacement earmark, rent bid and discounted flows; household support with individual bounds and `supportGrant_total = min treasury totalNeed`. [Policies.lean](MarxLeanProof/Simulator/Policies.lean) defines the strike score and proves its stated range. Consent and authorization remain separate event gates. |
+| §17.2: deterministic execution | [Execution.lean](MarxLeanProof/Simulator/Execution.lean): `Bundle.toLocalEvent` connects ledger bundles to complete-footprint `LocalEvent`; independent states commute and accept/reject decisions remain unchanged; `safeReorder_execute` preserves the serial state under independent adjacent swaps; forward canonical dependency edges are acyclic. |
+| §17.3; 17.1: divisible-pool shortcut | [Finance.lean](MarxLeanProof/Simulator/Finance.lean): serial partial fills, remaining-capacity identity, and `prefixFills_total`. This API is for a divisible pool with prevalidated demands, no inflows and no private failure gates; indivisible counterexamples exercise `resolve` instead. |
+| §§17.4–18: runtime profiles, caches, evidence | Profile/phase/key and context-version types record specification distinctions. Device data layout, bounded machine arithmetic, policy tables, scheduler construction, checkpoint completeness, CPU/GPU replay, performance and economic calibration are not proved by this library. |
+
+### Domains and execution boundary
+
+Ledger ticks use unbounded `ℕ`/`ℤ`, and fractional obligations and quote/payroll
+examples use exact `ℚ`. Analytical equations and continuous policies use `ℝ`.
+No machine-width overflow, floating-point roundoff or backend determinism is
+inferred from these types. A backend must check intermediate arithmetic and
+implement its declared rounding and table versions.
+
+`Bundle.commit` checks affordability **before** subtracting gross inputs. The
+accepted-event theorem equates its natural-number update with signed integer
+posting, so subtraction does not silently discard a shortage. Credits cannot fund
+the same event's initial debit. The abstract authorization predicate must include
+all relevant rights, consent, protected versions, timing and other scenario gates.
+Reservation, release and delayed production stages require their own dated bundles.
+
+Policy functions are mathematical formulas with the PDF's stated domains, not
+validators for arbitrary scenario inputs. In particular: lifetimes and research
+effort scales are positive; weights/health/fatigue lie in their declared intervals;
+wage and tax inversion require valid brackets, positive grid size and payable
+hours; household anchors require positive participating-adult count and normal
+day; lending requires positive term, minimum capital ratio and risk weight.
+Theorems expose the hypotheses used. Only quote availability and the explicitly
+defined missing/zero branches are handled inside their respective functions.
+
+The scheduler theorem requires proofs of complete read footprints and unchanged
+state outside each footprint. A concrete dependency-frontier implementation must
+establish that its event order is a `SafeReorder` of the canonical order. It must
+also retain observation boundaries, fixed payloads/handlers/arithmetic and logical
+IDs. The proof does not certify an arbitrary parallel schedule or a GPU runtime.
+
+The retained v6.0/v5.1 attachments supply additional scenario rules; this update
+does not claim to implement every inherited institutional handler or initializer.
+It follows v6.2's own distinction between mathematical identities, exact-account
+contracts, and implementation-level replay evidence.
+
+### Exact v6.2 examples
+
+[Simulator/Examples.lean](MarxLeanProof/Simulator/Examples.lean) checks the settled
+wage/purchase sequence; rejected-first-buyer fallback; cross-bank balances; gross
+versus net resource requirements; six-unit packets and the two-packet capacity;
+fractional thirds; legal/empty quote grids; the two-bit floored-draw counterexample;
+grain/bread values, raw coupled solution, research cost 6 and total 12; weighted
+residual bound 0.1; household deficit 0.25; tax/wage figures; funding needs 8 and 11;
+household grants `(1,2,3)`; divisible fills `(2,3,0)`; and indivisible jobs `(6,4)`
+against capacity 5. The default build includes all of these and audits their
+transitive axioms alongside the legacy proofs.
+
+Five additional review regressions use independently chosen inputs to check
+simultaneous updates away from a fixed point, asymmetric two-occupation closure
+and normalization, an operator certificate that fails for its transpose, and a
+valid goods account whose optional occupational closure is inadmissible. These
+are distinguished from the PDF's teaching fixtures in the source.
+
+v6.2 source SHA-256:
+`081ae1a1b32535cde678c5c68a4e700ab5003598d30dc23499ba4e31bc9f2d56`.
 
 ## Correspondence with the simplified mathematical paper
 
@@ -59,7 +158,7 @@ retains the full numerical examples from the original paper.
 | Proposition 5.2: units | `labor_change_units`, `demand_change_units`, `support_change_units`, `reproduction_change_physical_units`, `lifetime_unit_covariance`, `residual_change_labor_units`, `reference_rebase` |
 | Propositions 6.1–6.2: changes and error bounds | `labor_difference`, `labor_monotone`, `labor_hasDerivAt`, `coefficient_hasDerivAt`, `beta_hasDerivAt`, `normalized_derivative`, `values_derivative`, `weighted_labor_truncation`, `residual_error_bound`, `ratio_bounds` |
 
-## Correspondence with the supplied audited PDF
+## Legacy correspondence with the audited research PDF
 
 Names below are in `Research` unless an additional namespace is shown.
 
@@ -170,9 +269,9 @@ were each rejected. The fixtures are outside the proof library. A concrete
 off-diagonal coefficient perturbation checked the new derivative theorem's
 orientation without assuming a derivative of the solution.
 
-The PDF's separate 135-check Python bundle is not the Lean proof suite and is
+The legacy research PDF's separate 135-check Python bundle is not the Lean proof suite and is
 not required by this project. Compilation checks the general proofs as well as
 the Lean examples.
 
-Source PDF SHA-256:
+Legacy audited research source PDF SHA-256 (retained provenance):
 `dbe34d3afe1fb2f27c19cba55af498ab9bc8f7546fe73254e69b37160af94446`.

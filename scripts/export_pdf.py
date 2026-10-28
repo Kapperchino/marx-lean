@@ -12,7 +12,8 @@ import subprocess
 
 ROOT = Path(__file__).resolve().parent.parent
 WORK = ROOT / ".tools" / "pdf"
-OUTPUT = ROOT / "research_context_lean_proof.pdf"
+SOURCE_PDF = ROOT / "Unified_Economic_Simulator_Formal_Model_v6_2_Explained_GPU.pdf"
+OUTPUT = ROOT / "unified_economic_simulator_v6_2_lean_proof.pdf"
 ORDER = [
     ("Basic", "Production and unique labor accounts"),
     ("Productivity", "Neumann series and positive witnesses"),
@@ -29,6 +30,15 @@ ORDER = [
     ("Theorems", "Combined spectral and conversion results"),
     ("Model", "Contexts and the unified specification"),
     ("Examples", "Exact examples and counterexamples"),
+    ("Simulator/Analytics", "v6.2 sparse values, research plans and context versions"),
+    ("Simulator/Solver", "Weighted residual certificates and normalization bounds"),
+    ("Simulator/Ledger", "Exact event bundles, transfers and fractional claims"),
+    ("Simulator/Packets", "Exact production packets and gross resource bounds"),
+    ("Simulator/Policies", "Household, firm, research, payroll and bargaining policies"),
+    ("Simulator/Finance", "Credit limits, dated finance and household support"),
+    ("Simulator/Execution", "Logical identity, complete footprints and safe reordering"),
+    ("Simulator", "Unified simulator library entry point"),
+    ("Simulator/Examples", "Exact v6.2 examples and execution counterexamples"),
     ("Audit", "Transitive axiom dependency audit"),
 ]
 
@@ -42,7 +52,7 @@ def main() -> None:
     env = dict(os.environ)
     env["PATH"] = str(Path.home() / ".elan" / "bin") + os.pathsep + env["PATH"]
     paths = [ROOT / "MarxLeanProof.lean"] + [ROOT / "MarxLeanProof" / f"{n}.lean" for n, _ in ORDER]
-    actual = {p.resolve() for p in (ROOT / "MarxLeanProof").glob("*.lean")}
+    actual = {p.resolve() for p in (ROOT / "MarxLeanProof").rglob("*.lean")}
     if actual != set(paths[1:]):
         raise SystemExit("The PDF module order must include every Lean source module.")
     snapshots = {p: p.read_bytes() for p in paths}
@@ -71,14 +81,14 @@ def main() -> None:
         data = (ROOT / name).read_bytes()
         config.append({"path": name, "title": "Reproducible project configuration", "text": data.decode(), "sha256": sha(data)})
     payload = {
-        "title": "Research as Production Context",
+        "title": "Unified Economic Simulator v6.2",
         "date": datetime.datetime.now(datetime.timezone.utc).strftime("%d %B %Y (UTC)"),
         "toolchain": (ROOT / "lean-toolchain").read_text().strip(),
         "statementCount": count,
         "auditCount": int(audit.group(1)),
         "lineCount": sum(len(s["text"].splitlines()) for s in sources),
         "bundleHash": bundle_hash,
-        "paperHash": sha((ROOT / "research_context_formula_audited.pdf").read_bytes()),
+        "paperHash": sha(SOURCE_PDF.read_bytes()),
         "readme": (ROOT / "README.md").read_text(),
         "sources": sources,
         "config": config,
