@@ -18,6 +18,7 @@ struct Input: Decodable {
     let lineCount: Int
     let bundleHash: String
     let paperHash: String
+    let paperHashSource: String
     let readme: String
     let sources: [Source]
     let config: [Source]
@@ -292,8 +293,9 @@ beginSection("Snapshot provenance", "Configuration")
 paragraph(inline("The listing contains all \(input.sources.count) Lean source files (\(input.lineCount) original lines), with no omitted proof bodies. All \(input.statementCount) named theorem and lemma declarations are included. The typesetting adds page furniture, line numbers, color, and wrapping only."))
 paragraph(inline("Toolchain: `\(input.toolchain)`. The dependency versions are recorded in the reproduced Lake manifest. The source snapshot was built successfully using `lake --wfail build` immediately before export."))
 paragraph(inline("The build’s axiom audit covered \(input.auditCount) project declarations, including generated declarations. The permitted foundations are `propext`, `Classical.choice`, and `Quot.sound`. The PDF’s inherited Python checks are separate evidence; this library does not certify a GPU engine."))
-paragraph(attr("Supplied v6.2 model PDF / SHA-256", 10, "Helvetica-Bold"))
+paragraph(attr("v6.2 model PDF / SHA-256", 10, "Helvetica-Bold"))
 paragraph(attr(input.paperHash, 8, "Menlo-Regular"), leading: 13)
+paragraph(attr(input.paperHashSource, 9.5), leading: 14)
 paragraph(attr("Lean source snapshot / SHA-256", 10, "Helvetica-Bold"))
 paragraph(attr(input.bundleHash, 8, "Menlo-Regular"), leading: 13)
 paragraph(attr("The source snapshot digest hashes each relative file path, a NUL byte, its original UTF-8 bytes, and a NUL byte, in listing order. Per-file hashes appear after each listing.", 9.5), leading: 14)

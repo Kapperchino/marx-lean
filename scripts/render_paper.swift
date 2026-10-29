@@ -76,6 +76,8 @@ struct Box {
 let args = CommandLine.arguments
 guard args.count == 4 else { fatalError("Usage: render_paper.swift INPUT OUTPUT WORKDIR") }
 let article = try JSONDecoder().decode(Article.self, from: Data(contentsOf: URL(fileURLWithPath: args[1])))
+let documentTitle = article.blocks.first(where: { $0.kind == "title" })?.text ?? "Mathematical article"
+let documentSubtitle = article.blocks.first(where: { $0.kind == "subtitle" })?.text.replacingOccurrences(of: "\n", with: " ") ?? ""
 let output = URL(fileURLWithPath: args[2])
 let work = URL(fileURLWithPath: args[3], isDirectory: true)
 let pageWidth: CGFloat = 595.28, pageHeight: CGFloat = 841.89
@@ -160,7 +162,7 @@ func math(_ node: Node, _ size: CGFloat, _ display: Bool) -> Box {
         if node.tag == "mtext" || variant == "normal" { name = normal }
         if variant == "bold" { name = bold }
         if variant == "sans-serif" { name = "Helvetica" }
-        if variant == "double-struck" { value = ["R": "ℝ", "N": "ℕ" ][value] ?? value }
+        if variant == "double-struck" { value = ["R": "ℝ", "N": "ℕ", "Q": "ℚ", "Z": "ℤ", "C": "ℂ"][value] ?? value }
         if variant == "script" { value = ["A": "𝒜"][value] ?? value }
         var result = textBox(value, size, name)
         var padding: CGFloat = 0
@@ -271,7 +273,7 @@ struct Page { var placements: [Placement] = []; var label = "" }
 struct Bookmark { let title: String; let page: Int; let top: CGFloat }
 var pages = [Page()]
 var bookmarks: [Bookmark] = []
-var currentLabel = "Research as Production Context"
+var currentLabel = documentTitle
 var y = pageTop
 var overflows: [String] = []
 var equationScales: [[String: Any]] = []
@@ -387,14 +389,18 @@ for (index, block) in article.blocks.enumerated() {
         plain(block.text, size: 13.1, name: bold, gap: 10, kind: "section")
     case "statement":
         var required = paragraphHeight(block.runs ?? [], name: bold) + 8
-        if index+1 < article.blocks.count, article.blocks[index+1].kind == "paragraph" {
-            required += paragraphHeight(article.blocks[index+1].runs ?? [])
-            if index+2 < article.blocks.count, article.blocks[index+2].kind == "equation" {
-                let equation = mathBox(article.blocks[index+2].mathml!, 11.6, display: true)
+        // Keep a theorem's hypotheses and conclusion together when they fit on a page.
+        for following in article.blocks.dropFirst(index + 1) {
+            if following.kind == "paragraph" {
+                required += paragraphHeight(following.runs ?? [])
+            } else if following.kind == "equation" {
+                let equation = mathBox(following.mathml!, 11.6, display: true)
                 required += equation.ascent + equation.descent + 31
+            } else {
+                break
             }
         }
-        room(max(68, required))
+        room(max(68, min(required, pageBottom - pageTop)))
         y += 4
         plain(block.text, size: 11, name: bold, gap: 4, kind: "statement")
     case "proof":
@@ -442,8 +448,8 @@ guard overflows.isEmpty else { fatalError("Layout overflow: \(overflows.prefix(1
 var media = CGRect(x: 0, y: 0, width: pageWidth, height: pageHeight)
 let raw = work.appendingPathComponent("raw.pdf")
 let context = CGContext(raw as CFURL, mediaBox: &media, [
-    kCGPDFContextTitle: "Research as Production Context",
-    kCGPDFContextSubject: "Conditional labor requirements, reusable capabilities, and normalized occupational conversion — mathematical proofs",
+    kCGPDFContextTitle: documentTitle,
+    kCGPDFContextSubject: documentSubtitle,
     kCGPDFContextCreator: "KaTeX MathML / CoreText mathematical article exporter",
 ] as CFDictionary)!
 func draw(_ box: Box, x: CGFloat, baseline: CGFloat) {
@@ -467,8 +473,8 @@ for (i, page) in pages.enumerated() {
     context.beginPDFPage(nil)
     context.setFillColor(NSColor.white.cgColor); context.fill(media)
     if i > 0 {
-        draw(textBox("Research as Production Context", 8.5, italic), x: left, baseline: 37)
-        let running = textBox("Conditional requirements and conversion", 8.5, italic)
+        draw(textBox(documentTitle, 8.5, italic), x: left, baseline: 37)
+        let running = textBox("Mathematical exposition", 8.5, italic)
         draw(running, x: right-running.width, baseline: 37)
     }
     for item in page.placements { draw(item.box, x: item.x, baseline: item.baseline) }

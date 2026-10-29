@@ -1,0 +1,661 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=24mm]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{hyperref}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\title{Exact Economic Accounts\\[4pt]\large Production, occupational conversion, research,\\and causally consistent exchange}
+\author{}
+\date{28 October 2026}
+\begin{document}
+\maketitle
+\begin{abstract}
+We present a finite mathematical model connecting exact economic transactions with conditional production accounts. Complete events debit available resources before posting their credits; rational activity coefficients determine an integer production lattice, while fractional obligations retain unpaid remainders. Under spectral productivity, a nonnegative production system yields unique nonnegative occupational labor requirements. An optional reproduction convention determines normalized occupational weights through a second productivity condition. We derive research and inventory identities, finite capability closures, certified residual bounds, payroll and funding identities, and proportional support allocations. Finally, we prove that events with disjoint complete dependency sets commute, giving a sufficient condition for reordered execution to preserve a serial history. Worked examples show why gross inputs, transaction dates, denominator bounds, and the orientation of a solver certificate matter. The exposition follows the mathematical contracts of the Unified Economic Simulator v6.2; its behavioral parameters and interpretation are explicit modeling choices.
+\end{abstract}
+
+\section{State, context, and conventions}
+An economy contains people and households, productive establishments, firms, banks, and collective institutions. Their actual history consists of dated transfers, commitments, production stages, and changes of rights or capabilities. A policy proposes an action from observed information. A reference account evaluates requirements in a declared production context. These three objects interact, but a calculated requirement or a proposed action does not itself move a resource.
+
+A resource coordinate specifies its holder, instrument or good, unit, and relevant attributes such as location and quality. For spendable quantities let $s_i\in\mathbb N$ be the number of available ticks at coordinate $i$. Its physical amount is $q_i s_i$, where $q_i\in\mathbb Q_{>0}$ is its quantum. Signed accounting coordinates may instead take values in $\mathbb Z$. Summation across coordinates is meaningful only for a declared common unit and instrument, or after an explicitly supplied conversion.
+
+For analytical accounts, fix $n\geq1$ goods and $m\geq1$ occupations. The matrices
+\begin{equation}
+A\in\mathbb R_{\geq0}^{n\times n},\qquad
+H\in\mathbb R_{\geq0}^{m\times n}
+\end{equation}
+record ordinary inputs and direct occupational hours. The entry $A_{ij}$ is input $i$ per unit of output $j$; $H_{rj}$ is occupation-$r$ labor per unit of output $j$. The selected techniques, units, boundary, occupation classification, access conditions, and reference period are held fixed within a calculation. Distinct techniques can be represented by distinct output nodes.
+
+Vectors are columns, inequalities are entrywise, $I$ is an identity matrix, and $\mathbf1$ is an all-ones vector. We write $w\gg0$ when every coordinate is strictly positive, and $\rho(K)$ for the spectral radius including complex eigenvalues. Transpose is denoted by $K^{\mathsf T}$. Set $[a]_+=\max(0,a)$ and, for $l\leq u$, define
+\begin{equation}
+\operatorname{clip}(a;l,u)=\min(u,\max(l,a)).
+\end{equation}
+All integer and rational arithmetic in the model is exact. Continuous analytical equations are over the reals. Numerical approximations require the certificates introduced below.
+
+\section{Complete transactions and conservation}
+An event $e$ has grouped gross debits $d_e\in\mathbb N^R$, credits $c_e\in\mathbb N^R$, and an authorization predicate $a_e(s)$. Grouping means that repeated uses of one resource are added before its availability is tested. The predicate includes the relevant contractual, access, consent, timing, and version conditions. Define
+\begin{equation}
+f_e(s)\ \Longleftrightarrow\ a_e(s)\ \text{and}\ d_e\leq s,
+\qquad
+T_e(s)=\begin{cases}s-d_e+c_e,&f_e(s),\\s,&\text{otherwise}.\end{cases}
+\end{equation}
+Subtraction in the accepted branch is legitimate because all gross debits have already been checked. A production stage with delayed outputs is represented by dated events and any needed reservations; it cannot spend an output before the relevant credit occurs.
+
+\begin{proposition}[Atomic posting and conservation]
+An accepted event changes every coordinate by $c_{e,i}-d_{e,i}$ and leaves a nonnegative stock. A rejected event changes no coordinate. If each accepted event is balanced over a fixed group of comparable signed coordinates, then posting all accepted events conserves their total.
+\end{proposition}
+\begin{proof}
+For acceptance, $s_i\geq d_{e,i}$ implies $s_i-d_{e,i}+c_{e,i}\geq0$, with the same value when embedded in the integers. Rejection is the identity map by definition. For signed postings $\delta_e$, the conservation assertion is
+\begin{equation}
+\sum_i\left(s_i+\sum_{e\in E}\delta_{e,i}\right)
+=\sum_i s_i+\sum_{e\in E}\sum_i\delta_{e,i}
+=\sum_i s_i.
+\end{equation}
+The first equality interchanges finite sums; the last uses eventwise balance.
+\end{proof}
+
+Conservation does not imply affordability. An event consuming three units and returning two still needs three units at entry. Its net debit of one cannot justify acceptance from a stock of one. Similarly, a household with ten currency ticks cannot pay twelve until a six-tick wage has settled. Starting from household, employer, and seller balances $(10,20,0)$, the wage followed by the purchase gives $(4,14,12)$.
+
+For a cross-bank payment of $a$ ticks, order the coordinates as payer deposit, payer-bank reserves, recipient-bank reserves, and recipient deposit. The posting is $(-a,-a,a,a)$. The two deposit coordinates conserve their sum, as do the two reserve coordinates. These are separate conservation statements for separate instruments. An infeasible higher-priority purchase leaves stock available for a later feasible buyer because rejection makes no state change.
+
+\section{Integer production packets and fractional claims}
+Suppose each gross input or output leg requires a reduced rational number $p_i/d_i$ of ticks per activity unit, where $p_i\in\mathbb N$ and $d_i\geq1$. Activity counts in this subsection are nonnegative integers in the declared activity unit. Define
+\begin{equation}
+L=\operatorname{lcm}_i d_i,\qquad b_i=\frac{L}{d_i}p_i.
+\end{equation}
+For an empty set of legs take $L=1$. A packet contains $L$ activity units and $b_i$ ticks on leg $i$.
+
+\begin{proposition}[Exact packets and maximum feasible count]
+The integer $L$ is the least positive integer activity size making every leg integral. If $Q$ is a planned packet count, $s_i$ are exclusively assigned available resources, and $b_i$ are grouped gross input ticks per packet, the greatest feasible packet count is
+\begin{equation}
+q^*=\min\left(Q,\ \min_{i:b_i>0}\left\lfloor\frac{s_i}{b_i}\right\rfloor\right).
+\end{equation}
+An empty inner minimum imposes no restriction, so $q^*=Q$ in that case.
+\end{proposition}
+\begin{proof}
+For a reduced fraction, $tp_i/d_i$ is an integer exactly when $d_i$ divides $t$. All legs are therefore integral exactly when $L$ divides $t$. In particular, $b_i d_i=Lp_i$. For a positive debit $b_i$, the inequality $qb_i\leq s_i$ is equivalent to $q\leq\lfloor s_i/b_i\rfloor$. A zero debit imposes no restriction. Taking the minimum of all resource bounds and the plan bound yields exactly all feasible counts and hence their greatest member.
+\end{proof}
+
+For coefficients $(1/2,1/3,1)$, one packet has six activity units and ticks $(3,2,6)$. If the first two legs are inputs, stocks $(8,5)$ and a plan of four packets permit two packets. Concurrent proposals cannot each treat the same stock as exclusively assigned; actual acceptance still uses complete events.
+
+A fractional obligation has numerator $n\in\mathbb N$ and fixed denominator $d\geq1$, representing $n/d$ currency ticks. Accrual at numerator rate $p$ for $u$ units replaces $n$ by $n+pu$. Whole payable ticks and the retained remainder are
+\begin{equation}
+h=\left\lfloor\frac nd\right\rfloor,\qquad r=n\bmod d,\qquad n=dh+r,\quad 0\leq r<d.
+\end{equation}
+
+\begin{proposition}[Settlement preserves the fractional remainder]
+If $k\leq h$ whole ticks are paid by an authorized, funded payment event, the claim update $n'=n-dk$ satisfies $n'+dk=n$ and $n'\bmod d=r$.
+\end{proposition}
+\begin{proof}
+The condition $k\leq\lfloor n/d\rfloor$ gives $dk\leq n$, so subtraction is exact. Substituting $n=dh+r$ gives $n'=d(h-k)+r$, which has the same remainder because $0\leq r<d$.
+\end{proof}
+
+Three accruals of one third therefore produce one payable tick. A claim of five thirds becomes two thirds after paying one tick. Rounding each accrual independently would destroy this identity.
+
+\section{Productivity and conditional labor requirements}
+For final demand $y\geq0$, ordinary reproduction requires $x=Ax+y$. Its feasibility as a linear requirement is distinct from the timing and capacity feasibility of an actual production history.
+
+\begin{theorem}[Equivalent productivity criteria]
+For $A\geq0$, the following conditions are equivalent: $\rho(A)<1$; the series $\sum_{k\geq0}A^k$ converges; $I-A$ has a nonnegative inverse; there exists $w\gg0$ with $Aw\ll w$; and every $y\geq0$ has exactly one nonnegative solution of $x=Ax+y$. Under these conditions,
+\begin{equation}
+N=(I-A)^{-1}=\sum_{k=0}^{\infty}A^k\geq I,\qquad x=Ny.
+\end{equation}
+We call such a matrix productive.
+\end{theorem}
+\begin{proof}
+If $\rho(A)<1$, the Jordan form over the complex numbers shows that every entry of $A^k$ is bounded by a polynomial in $k$ times a geometric sequence with ratio less than one, apart from finitely many initial terms. The matrix series therefore converges. Multiplying its finite partial sums on either side by $I-A$ gives $I-A^{K+1}$; taking limits proves that the sum is a two-sided inverse. Nonnegativity follows term by term.
+
+Conversely, if $N=(I-A)^{-1}\geq0$, set $w=N\mathbf1$. Then $w=Aw+\mathbf1\geq\mathbf1$, hence $Aw\ll w$. Given any such witness, set $D=\operatorname{diag}(w)$ and $c=\max_i(Aw)_i/w_i<1$. The nonnegative matrix $D^{-1}AD$ has every row sum at most $c$, so its spectral radius, and hence $\rho(A)$, is at most $c$.
+
+The inverse gives $x=Ny\geq0$ and uniqueness even among signed solutions. Conversely, existence of a nonnegative solution for $y=\mathbf1$ already gives $x\geq\mathbf1$ and $Ax=x-\mathbf1\ll x$, which supplies the positive witness. This closes all implications.
+\end{proof}
+
+\begin{theorem}[Unique occupational and scalar accounts]
+If $A$ is productive, the unique matrix satisfying $G=H+GA$ is
+\begin{equation}
+G=HN=\sum_{k=0}^{\infty}HA^k\geq0.
+\end{equation}
+For supplied occupational weights $\alpha\gg0$, the unique scalar requirement vector is
+\begin{equation}
+v=G^{\mathsf T}\alpha,
+\qquad v=A^{\mathsf T}v+H^{\mathsf T}\alpha,
+\qquad v^{\mathsf T}y=\alpha^{\mathsf T}Gy.
+\end{equation}
+\end{theorem}
+\begin{proof}
+The matrix balance is $G(I-A)=H$, so right multiplication by $N$ proves existence and uniqueness. Transposing and multiplying by $\alpha$ gives the scalar balance; $I-A^{\mathsf T}$ is invertible, so this solution is unique. The last equality is the transpose identity for a scalar product.
+\end{proof}
+
+The entries of $G$ are conditional hours by occupation. Scalarization introduces a weighting convention. Neither $G$ nor $v$ is a market price, an actual cash flow, or an authorization to produce. If a reproduction condition fails, its account is unavailable; replacing it by zero would assert a different mathematical result.
+
+\section{Optional occupational reproduction and normalization}
+Let $S_{ir}$ be recurrent goods per productive occupation-$r$ hour, $E_{ir}$ initial goods per entrant, $U_{sr}$ training hours of occupation $s$ per entrant to $r$, and $\gamma_r>0$ the productive lifetime in hours. Define
+\begin{equation}
+P_{ir}=S_{ir}+\frac{E_{ir}}{\gamma_r},\qquad
+T_{sr}=\frac{U_{sr}}{\gamma_r},\qquad M=GP+T.
+\end{equation}
+All these primitives are nonnegative. The matrix $M$ records occupational requirements per reproduced occupational hour, including the production of reproduction goods. This section imposes the optional convention that every occupational hour leaves the same strictly positive residual after its reproduction requirement has been deducted in the common scalar account.
+
+\begin{theorem}[Existence and uniqueness of normalized conversion]
+Fix a reference occupation $b$. There exist $\alpha\gg0$ and $\kappa>0$ satisfying
+\begin{equation}
+\alpha=M^{\mathsf T}\alpha+\kappa\mathbf1,\qquad \alpha_b=1
+\end{equation}
+if and only if $\rho(M)<1$. When they exist they are unique, with
+\begin{equation}
+\beta=(I-M^{\mathsf T})^{-1}\mathbf1\geq\mathbf1,
+\qquad \alpha=\frac{\beta}{\beta_b},\qquad \kappa=\frac1{\beta_b}.
+\end{equation}
+\end{theorem}
+\begin{proof}
+If $M$ is productive, so is its transpose. Its nonnegative inverse applied to $\mathbf1$ gives $\beta=\mathbf1+M^{\mathsf T}\beta\geq\mathbf1$. Thus $\beta_b>0$, and the displayed normalization satisfies every required condition. Any solution obeys $\alpha=\kappa\beta$; its reference coordinate forces $\kappa=1/\beta_b$. Conversely, any positive solution gives $M^{\mathsf T}\alpha=\alpha-\kappa\mathbf1\ll\alpha$. The positive-witness criterion proves $\rho(M^{\mathsf T})=\rho(M)<1$.
+\end{proof}
+
+Changing the reference from $b$ to $c$ divides every weight and every scalar requirement by $\alpha_c$. Pairwise ratios $\alpha_i/\alpha_j=\beta_i/\beta_j$ are therefore independent of the reference. Equal column sums $s<1$ of $M$ give $\beta=(1-s)^{-1}\mathbf1$, so all normalized occupational weights equal one.
+
+\begin{theorem}[Coupled admissibility]
+Let
+\begin{equation}
+B=\begin{pmatrix}A&P\\H&T\end{pmatrix},\qquad
+K=B^{\mathsf T}=\begin{pmatrix}A^{\mathsf T}&H^{\mathsf T}\\P^{\mathsf T}&T^{\mathsf T}\end{pmatrix}.
+\end{equation}
+Then $\rho(K)<1$ exactly when $A$ is productive and $M=H(I-A)^{-1}P+T$ is productive. In that case the unique nonnegative coupled account satisfies
+\begin{equation}
+u=A^{\mathsf T}u+H^{\mathsf T}\beta,\qquad
+\beta=\mathbf1+P^{\mathsf T}u+T^{\mathsf T}\beta,
+\qquad u=G^{\mathsf T}\beta.
+\end{equation}
+\end{theorem}
+\begin{proof}
+If $B$ is productive, take a witness $(x,z)\gg0$ with $B(x,z)\ll(x,z)$. Its first block gives $Ax\ll x$, so $A$ is productive. Write $N=(I-A)^{-1}$. Since $(I-A)x>Pz$, multiplication by $N\geq0$ gives $x\geq NPz$. Hence $Mz=HNPz+Tz\leq Hx+Tz\ll z$, establishing productivity of $M$.
+
+Conversely, if $A$ and $M$ are productive, write $W=(I-M)^{-1}$. Direct block multiplication gives
+\begin{equation}
+(I-B)^{-1}=
+\begin{pmatrix}
+N+NPWHN&NPW\\WHN&W
+\end{pmatrix}\geq0.
+\end{equation}
+Thus $B$, and therefore $K$, is productive. Eliminating $u$ from the first coupled equation gives $u=G^{\mathsf T}\beta$; the second becomes $\beta=\mathbf1+M^{\mathsf T}\beta$. The preceding theorem proves existence and uniqueness.
+\end{proof}
+
+Dividing both coupled equations by $\beta_b$ yields $v=u/\beta_b$ and $\alpha=\beta/\beta_b$. The constant in the normalized occupational equation is $\kappa\mathbf1$, not $\mathbf1$. A simultaneous fixed-point iteration reads the old $u$ and old $\beta$ in both blocks. Updating one block in place defines a different iteration.
+
+Goods productivity does not guarantee this optional closure. For $A=0$, $H=[1]$, $P=[1]$, and $T=0$, the goods account with supplied weight one is $v=1$, while $M=[1]$ has spectral radius one and admits no positive equal residual.
+
+\section{Research, final demand, and inventories}
+Let $J\in\mathbb R_{\geq0}^{n\times r}$ contain ordinary goods per research attempt and $F\in\mathbb R_{\geq0}^{m\times r}$ contain its additional direct occupational hours. For weights $\alpha$, define the vector of attempt requirements by
+\begin{equation}
+\eta=J^{\mathsf T}v+F^{\mathsf T}\alpha,
+\qquad v=G^{\mathsf T}\alpha.
+\end{equation}
+Successful and failed attempts incur the inputs they actually use. A successful outcome may change the accessible techniques or capabilities of a later context; it does not automatically add its historical discovery expenditure to every later product.
+
+\begin{proposition}[The two-account identity]
+Let $y\geq0$ be ordinary final demand excluding the research inputs already represented by $Jz$, and let $z\geq0$ be attempt quantities. If all ordinary inputs are freshly reproduced, then
+\begin{equation}
+v^{\mathsf T}y+\eta^{\mathsf T}z
+=\alpha^{\mathsf T}\bigl(HN(y+Jz)+Fz\bigr).
+\end{equation}
+\end{proposition}
+\begin{proof}
+Substitution gives $v^{\mathsf T}y=\alpha^{\mathsf T}Gy$ and $\eta^{\mathsf T}z=\alpha^{\mathsf T}(GJ+F)z$. Add these identities and use $G=HN$. Each direct occupational hour is weighted once.
+\end{proof}
+
+The fresh-input requirement must be reconciled with inventories when describing an actual history. At date $t$, let $x_t$ be gross output, $s_t$ opening inventories, and $y_t$ final deliveries. Suppose
+\begin{equation}
+s_{t+1}=s_t+(I-A_t)x_t-y_t-J_tz_t.
+\end{equation}
+The following result is an accounting identity conditional on this material balance; it makes no claim that the balance alone supplies an executable schedule.
+
+\begin{proposition}[Chronological reconciliation]
+For productive $A_t$ and $G_t=H_t(I-A_t)^{-1}$,
+\begin{equation}
+H_tx_t+F_tz_t
+=G_t(y_t+J_tz_t+s_{t+1}-s_t)+F_tz_t.
+\end{equation}
+If $A_t=A$ and $H_t=H$ are constant for $0\leq t<d$, total actual occupational hours satisfy
+\begin{equation}
+\sum_{t=0}^{d-1}(Hx_t+F_tz_t)
+=\sum_{t=0}^{d-1}\bigl(Gy_t+(GJ_t+F_t)z_t\bigr)+G(s_d-s_0).
+\end{equation}
+\end{proposition}
+\begin{proof}
+Rearrange the material balance and multiply by $G_t$. The identity $G_t(I-A_t)=H_t$ gives the datewise formula. In a constant context, the sum of $G(s_{t+1}-s_t)$ telescopes to $G(s_d-s_0)$.
+\end{proof}
+
+An input requiring one hour may be produced into inventory on one date and used by a project requiring two additional hours on another. Actual total labor is three hours. Counting the first production hour and then the project's three-hour fresh-input requirement would count the input twice; the inventory adjustment removes that duplication. For changing $G_t$, the weighted inventory increments generally do not collapse to an endpoint term.
+
+\section{Reusable capabilities and missing prerequisites}
+Let $C\in\{0,1\}^{n\times n}$ be a declared dependency graph with an edge from upstream output $i$ to dependent output $j$, and let $D\in\{0,1\}^{q\times n}$ record direct capability labels. Boolean multiplication $\odot$ uses AND along a path and OR across alternative paths. Write $C^0=I$ and
+\begin{equation}
+C^*=\bigvee_{k=0}^{n-1}C^k,\qquad R=D\odot C^*.
+\end{equation}
+This is a set-valued dependency account. Reusable knowledge is not consumed in proportion to the number of units produced.
+
+\begin{theorem}[Finite least closure and numerical support]
+The matrix $R$ is the least solution of $R=D\vee(R\odot C)$. Starting from $R_0=D$, the iteration $R_{k+1}=D\vee(R_k\odot C)$ reaches it within $n-1$ propagation rounds. If $A$ is productive and $C\geq\operatorname{supp}(A)$, then
+\begin{equation}
+\operatorname{supp}(N)=\operatorname{supp}(A)^*,\qquad
+\operatorname{supp}(\widehat D N)
+=D\odot\operatorname{supp}(A)^*\leq R,
+\end{equation}
+where $\widehat D$ is the real zero-one version of $D$ and support means strictly positive entries.
+\end{theorem}
+\begin{proof}
+Every reachable pair has a path with no repeated vertices after cycles are removed; length zero accounts for a vertex reaching itself. Thus paths of length at most $n-1$ suffice. Induction gives $R_k=\bigvee_{j=0}^{k}D\odot C^j$. Splitting a nonempty path at its last edge proves the fixed-point identity. Any fixed point contains the direct labels and, by induction, all their propagated labels, proving leastness.
+
+For the numerical assertion, $(A^k)_{ij}>0$ precisely when some length-$k$ path has all positive edge coefficients. This follows by expanding a matrix product into a sum of nonnegative products. Since $N=\sum_{k\geq0}A^k$, an entry of $N$ is positive exactly when at least one such path exists. Applying the same argument to $\widehat D N$ proves the label identity; enlarging the declared graph can only enlarge reachability.
+\end{proof}
+
+Leastness matters: if $D=0$ and $C=I$, every Boolean matrix is a fixed point, but the closure is zero. Extra declared technical dependencies may also carry information absent from material coefficients, so equality with $R$ is not asserted for an arbitrary larger graph.
+
+For $r\geq1$ candidate projects, let $Q_{ij}=1$ mean project $j$ requires the result of project $i$, let $b_i$ indicate a missing result, and let $\tau$ indicate targets. Define
+\begin{equation}
+z_0=b\wedge\tau,\qquad
+z_{k+1}=b\wedge\bigl(\tau\vee(Q\odot z_k)\bigr).
+\end{equation}
+Here propagation traces prerequisites backwards from targets. The mask is applied at every step, so an already satisfied result stops further expansion along that route. The same path argument proves leastness and termination within $r-1$ rounds. If each selected project is attempted once, common prerequisites are counted once as members of a set. This closure supplies neither a topological execution order for an unsatisfied cycle nor a proof of success.
+
+Executable readiness separately requires discovery, mastery, permission, installed adoption, resources, time, and authority. Possession of a label or inclusion in a dependency closure establishes only the corresponding logical condition.
+
+\section{Certified analytical accuracy}
+Consider $q=b+Kq$ for a specified nonnegative matrix $K$. A certificate belongs to the operator actually being solved: goods output uses $A$, scalar goods requirements use $A^{\mathsf T}$, and the coupled account uses the block operator $K$ of Section 5. Equal spectral radii of a matrix and its transpose do not make their coordinatewise certificates interchangeable.
+
+\begin{theorem}[A weighted residual certificate]
+Suppose $w\gg0$, $0\leq c<1$, and $Kw\leq cw$. Define
+\begin{equation}
+\|x\|_w=\max_i\frac{|x_i|}{w_i},\qquad
+r=b+K\widetilde q-\widetilde q.
+\end{equation}
+Then $K$ is productive, $q=(I-K)^{-1}b$ is the unique solution, and every approximation satisfies
+\begin{equation}
+\|q-\widetilde q\|_w\leq\frac{\|r\|_w}{1-c},
+\qquad |q_i-\widetilde q_i|\leq\frac{w_i\|r\|_w}{1-c}.
+\end{equation}
+\end{theorem}
+\begin{proof}
+The certificate gives $Kw\ll w$, hence productivity. Nonnegativity yields $|Kx|\leq K|x|\leq\|x\|_w Kw$, so $\|Kx\|_w\leq c\|x\|_w$. With $e=q-\widetilde q$, subtraction of the equations gives $e=Ke+r$. Taking norms and rearranging gives $(1-c)\|e\|_w\leq\|r\|_w$. The coordinate bound is the defining property of the weighted norm.
+\end{proof}
+
+For the finite Neumann approximation $q_k=\sum_{j=0}^{k}K^j b$, the same contraction inequality also gives
+\begin{equation}
+\|q-q_k\|_w\leq\frac{c^{k+1}}{1-c}\|b\|_w.
+\end{equation}
+Indeed, bound each omitted term by $c^j\|b\|_w$ and sum the geometric tail. A residual computed with rounding must itself have a valid upper bound before this theorem supplies a certified conclusion.
+
+\begin{proposition}[Normalization of certified intervals]
+If $0\leq u^-\leq u\leq u^+$ and $0<\beta^-\leq\beta\leq\beta^+$, then
+\begin{equation}
+\frac{u^-}{\beta^+}\leq\frac u\beta\leq\frac{u^+}{\beta^-}.
+\end{equation}
+\end{proposition}
+\begin{proof}
+For a nonnegative numerator, division is increasing in the numerator and decreasing in a positive denominator. Apply these two monotonicities to each endpoint.
+\end{proof}
+
+This allows zero lower bounds for goods values, while the reference occupational denominator must have a strictly positive lower bound. Missing inputs, an inapplicable question, failed productivity, and unresolved numerical accuracy are different reasons for an unavailable result. Cached accounts also require matching context versions; a change of technique, units, access, classification, reference occupation, or numerical convention may invalidate reuse.
+
+\section{Changes of coefficients, units, and boundary}
+The accounts admit exact transformations that help distinguish a changed economy from a changed representation.
+
+\begin{proposition}[Finite changes and local derivatives]
+For two productive matrices $A,A'$ with accounts $G,G'$ and $N'=(I-A')^{-1}$,
+\begin{equation}
+G'-G=\bigl(H'-H+G(A'-A)\bigr)N'.
+\end{equation}
+If $0\leq A'\leq A$ and $0\leq H'\leq H$, then $A'$ is productive and $G'\leq G$. Along differentiable coefficient curves, at a point where $A$ and the occupational reproduction matrix $M$ are productive,
+\begin{equation}
+\dot G=(\dot H+G\dot A)N,\qquad
+\dot\beta=(I-M^{\mathsf T})^{-1}\dot M^{\mathsf T}\beta.
+\end{equation}
+\end{proposition}
+\begin{proof}
+Subtract the two balance equations to obtain $(G'-G)(I-A')=H'-H+G(A'-A)$, and right multiply by $N'$. A positive witness for $A$ also works for $A'\leq A$; nonnegative powers satisfy $(A')^k\leq A^k$, so the series give $G'\leq G$. The matrix inverse is differentiable on the open set of invertible matrices. Differentiating $G=H+GA$ and $\beta=\mathbf1+M^{\mathsf T}\beta$, and solving the resulting linear equations, proves the derivative formulas.
+\end{proof}
+
+These derivatives concern fixed coordinates. They make no smoothness assertion across a change of available technique, catalogue, or admissibility regime. Normalized derivatives follow by differentiating the quotient $\alpha_i=\beta_i/\beta_b$.
+
+\begin{proposition}[Physical unit covariance]
+Let $D$ be a positive diagonal matrix such that an old quantity vector equals $D$ times its new numerical representation. Then
+\begin{equation}
+A'=D^{-1}AD,\quad H'=HD,\quad P'=D^{-1}P,\quad y'=D^{-1}y
+\end{equation}
+give $G'=GD$, $M'=M$, $\alpha'=\alpha$, and $v'=Dv$. Both occupational and scalar totals are unchanged: $G'y'=Gy$ and $(v')^{\mathsf T}y'=v^{\mathsf T}y$.
+\end{proposition}
+\begin{proof}
+Similarity gives $(I-A')^{-1}=D^{-1}ND$ and preserves productivity. Hence $G'=HD D^{-1}ND=GD$ and $G'P'+T=GP+T=M$. The normalized conversion is therefore unchanged. Transpose the formula for $G'$ and use that $D$ is diagonal to obtain $v'=Dv$. The total identities follow by cancellation.
+\end{proof}
+
+\begin{theorem}[Eliminating an external production boundary]
+Partition goods into retained nodes $L$ and external nodes $O$. For productive $A$, define
+\begin{equation}
+\begin{aligned}
+N_O&=(I-A_{OO})^{-1},\\
+A_*&=A_{LL}+A_{LO}N_OA_{OL},\\
+H_*&=H_L+H_ON_OA_{OL}.
+\end{aligned}
+\end{equation}
+Both $A_{OO}$ and $A_*$ are productive. The retained labor account and total hours satisfy
+\begin{equation}
+\begin{aligned}
+G_L&=H_*(I-A_*)^{-1},\\
+x_L&=(I-A_*)^{-1}(y_L+A_{LO}N_Oy_O),\\
+Hx&=H_*x_L+H_ON_Oy_O.
+\end{aligned}
+\end{equation}
+If reproduction goods are partitioned as $(P_L,P_O)$, the same occupational reproduction matrix is obtained from
+\begin{equation}
+P_*=P_L+A_{LO}N_OP_O,\qquad
+T_*=T+H_ON_OP_O,\qquad M=G_LP_*+T_*.
+\end{equation}
+\end{theorem}
+\begin{proof}
+Take a positive witness $(w_L,w_O)$ for $A$. The external block gives $A_{OO}w_O\ll w_O$, hence a nonnegative inverse $N_O$, and $N_OA_{OL}w_L\leq w_O$. Consequently $A_*w_L\leq A_{LL}w_L+A_{LO}w_O\ll w_L$, so $A_*$ is productive.
+
+The external labor columns give $G_O=(H_O+G_LA_{LO})N_O$. Substitute this into the retained columns to obtain $G_L=H_*+G_LA_*$. Likewise, solve the external output equation as $x_O=N_O(A_{OL}x_L+y_O)$ and substitute into the retained equation and the expression for $Hx$. Finally substitute the displayed $G_O$ into $M=G_LP_L+G_OP_O+T$ and collect terms.
+\end{proof}
+
+Eliminated production therefore contributes to effective coefficients. Deleting external nodes without these corrections generally changes both labor requirements and normalized occupational conversion. External final demand also remains in the reduced account.
+
+\section{Bounded policies and exact quote grids}
+A policy formula maps admitted observations to a proposal. Its parameters specify behavior; algebraic boundedness does not identify an empirical calibration. For $0\leq\lambda\leq1$, the update
+\begin{equation}
+\operatorname{blend}(a,b;\lambda)=a+\lambda(b-a)
+=(1-\lambda)a+\lambda b
+\end{equation}
+stays between $a$ and $b$. If the new observation is absent, the specified update retains $a$. Absence is not represented by an observed zero.
+
+For a rational price candidate $p$, legal bounds $l\leq u$, and quantum $\Delta>0$, define the integer endpoints $L=\lceil l/\Delta\rceil$ and $U=\lfloor u/\Delta\rfloor$. If $L>U$, no legal quote exists. Otherwise set
+\begin{equation}
+p^*=\Delta\operatorname{clip}\left(\left\lceil\frac p\Delta\right\rceil;L,U\right).
+\end{equation}
+
+\begin{proposition}[Legal grid projection]
+When a quote exists, it is a multiple of $\Delta$ and satisfies $l\leq p^*\leq u$.
+\end{proposition}
+\begin{proof}
+The clipped tick count $k$ is an integer with $\lceil l/\Delta\rceil\leq k\leq\lfloor u/\Delta\rfloor$. Hence $l/\Delta\leq k\leq u/\Delta$. Multiplication by the positive quantum gives the bounds.
+\end{proof}
+
+For $p=2.001$, $u=2.009$, $l=0$, and $\Delta=0.01$, the quote is $2.00$. Raising the lower bound to $2.005$ leaves no legal grid point. Clipping a rounded quote directly to the non-grid upper bound would violate the tick convention.
+
+Useful continuous response curves are
+\begin{equation}
+h(x)=1-e^{-x},\quad x\geq0,\qquad
+\sigma(z)=\frac1{1+e^{-z}},\quad z\in\mathbb R.
+\end{equation}
+They satisfy $0\leq h(x)<1$, $h(0)=0$, and $0<\sigma(z)<1$, because the exponential is strictly positive and $e^{-x}\leq1$ for $x\geq0$.
+
+If a draw has $2^b$ possible integer outcomes and a rational probability is $p=n/d$ with $0\leq n\leq d$ and $d>0$, define success by
+\begin{equation}
+U<\left\lfloor\frac{2^bn}{d}\right\rfloor,
+\qquad U\in\{0,\ldots,2^b-1\}.
+\end{equation}
+Under the additional assumption that $U$ is uniform, the success probability is $2^{-b}\lfloor2^bp\rfloor$, whose shortfall from $p$ is less than $2^{-b}$. Probability zero never succeeds and probability one always succeeds. This exact floored rule is not interchangeable with $dU<2^bn$: for $b=2$, $n=1$, $d=3$, and $U=1$, the latter accepts while the floored rule rejects. Logical draw keys can specify a seed, date, domain, persistent object identity, and draw index; the mathematical threshold itself does not establish uniformity or independence of a particular generator.
+
+\section{Households, production capacity, and research effort}
+For household service needs $n_i\geq0$, delivered services $d_i\geq0$, and weights $a_i\geq0$, define the deficit
+\begin{equation}
+\delta=\sum_{i:n_i>0}a_i\frac{[n_i-d_i]_+}{n_i},
+\qquad \sum_{i:n_i>0}a_i\leq1.
+\end{equation}
+Zero-need categories contribute zero. Each shortage ratio lies in $[0,1]$, so $0\leq\delta\leq1$. Delivered services, rather than announced or authorized services, enter this expression.
+
+Let health $h$ and fatigue $f$ lie in $[0,1]$, let $\bar\ell\geq0$ be a work-hour cap, and let $r\geq0$ be hours reserved for other activities on the same daily clock. A nonparticipant supplies zero hours; for a participant the available proposal is
+\begin{equation}
+\ell=\min\bigl(\bar\ell h(1-f),[24-r]_+\bigr).
+\end{equation}
+For recovery and damage parameters $a,b,c\geq0$, a fatigue response $\lambda\geq0$, exertion $e$, and rest $s$, one specified update is
+\begin{equation}
+\begin{aligned}
+h'&=\operatorname{clip}\bigl(h+a(1-h)(1-\delta)-b\delta-cf;0,1\bigr),\\
+f'&=\operatorname{clip}\bigl(f+\lambda(e-s)/8;0,1\bigr).
+\end{aligned}
+\end{equation}
+These updates use executed activities; proposals alone cannot improve health or replenish time.
+
+A firm's smoothed demand forecast may use sales $s$, valid unfilled demand $u$, and $0\leq\lambda\leq1$. For target coverage $k\geq0$, finished inventory $I_f$, and pipeline inventory $I_p$, set
+\begin{equation}
+\widehat d'=\operatorname{blend}(\widehat d,s+u;\lambda),\qquad
+x^{\mathrm{plan}}=[k\widehat d-(I_f+I_p)]_+.
+\end{equation}
+The start proposal uses the currently visible forecast $\widehat d$. The updated forecast $\widehat d'$ becomes visible only at its declared observation boundary. Actual starts must still satisfy packet integrality, resources, and event authorization. A price candidate with response $\theta\geq0$, excess supply $e$, demand $d\geq0$, and positive reference quantity $q_0$ is
+\begin{equation}
+p^{\mathrm{cand}}=p\exp\left(\theta\operatorname{clip}\left(\frac{u-e}{\max(d,q_0)};-1,1\right)\right).
+\end{equation}
+It becomes a payable quote only after projection onto the legal price grid.
+
+For a machine, distinguish remaining lifetime service $R\geq0$ from condition $c\in[0,1]$. Nameplate service $N$ and downtime $d$ satisfy $0\leq d\leq N$. Permitted usage obeys $0\leq u\leq\min(R,c(N-d))$. For nonnegative wear $a$, restoration $b$, and maintenance $m$, set
+\begin{equation}
+R'=R-u,\qquad c'=\operatorname{clip}(c-au+bm;0,1).
+\end{equation}
+Maintenance may restore condition but does not add lifetime service in this specification. A renewable stock $S$ with extraction $e$, carrying capacity $K>0$, and rate $0\leq r\leq1$ instead follows
+\begin{equation}
+z=S-e,\qquad S'=z\left(1+r\left(1-\frac zK\right)\right),
+\qquad 0\leq e\leq S\leq K.
+\end{equation}
+
+\begin{proposition}[State bounds]
+The household updates keep health and fatigue in $[0,1]$ and proposed work hours nonnegative. The machine update gives $0\leq R'\leq R$ and $0\leq c'\leq1$. The renewable-stock update gives $0\leq S'\leq K$.
+\end{proposition}
+\begin{proof}
+Clipping supplies the unit-interval bounds. Both arguments of the work-hour minimum are nonnegative, and $0\leq u\leq R$ supplies the lifetime bounds. For renewal, $0\leq z\leq K$ makes both factors nonnegative. Since $r\leq1$,
+\begin{equation}
+S'\leq z(2-z/K)=K-\frac{(K-z)^2}{K}\leq K.
+\end{equation}
+\end{proof}
+
+For research exposure $a$, absorptive capacity $c$, and relatedness $r$ in $[0,1]$, minimum and pioneer effort scales $0<s_{\min}\leq s_{\mathrm{p}}$, and shape $\nu>0$, a possible scale and success rule are
+\begin{equation}
+s=s_{\min}+(s_{\mathrm{p}}-s_{\min})(1-acr)^\nu,
+\qquad p=1-e^{-E/s},\quad E\geq0.
+\end{equation}
+The scale lies between its specified endpoints, and zero executed effort gives zero success probability. Exposure can update to $a'=a+(1-a)h(z)$ for a nonnegative signal $z$, retaining $a'\in[a,1]$. Success records an outcome; mastery, permission, adoption, and funding remain separate conditions.
+
+\section{Payroll, taxes, and bargaining proposals}
+For rational income $y$, define a piecewise affine tax by thresholds $b_j$ and changes $\Delta t_j$ in marginal rates:
+\begin{equation}
+\tau(y)=t_0y+\sum_j\Delta t_j[y-b_j]_+,\qquad
+N(y)=(1-c)y-\tau(y).
+\end{equation}
+Here $c$ is the employee charge rate, and $N(y)$ is cumulative net income. The net increment of a new gross payment $g$ after cumulative paid income $y$ is
+\begin{equation}
+\Delta N(y,g)=N(y+g)-N(y).
+\end{equation}
+
+\begin{proposition}[Payroll partition and aggregation]
+Sequential net increments telescope, and withholding partitions gross pay exactly:
+\begin{equation}
+\begin{aligned}
+\Delta N(y,g_1)+\Delta N(y+g_1,g_2)&=\Delta N(y,g_1+g_2),\\
+\Delta N(y,g)+\tau(y+g)-\tau(y)+cg&=g.
+\end{aligned}
+\end{equation}
+\end{proposition}
+\begin{proof}
+The first identity cancels the intermediate term $N(y+g_1)$. For the second, substitute the definition of $N$; the tax increments cancel and $(1-c)g+cg=g$.
+\end{proof}
+
+Consequently, separate employers must use the appropriate cumulative paid-income base rather than each restarting allowances. On a bracket where $N(y)=N(b)+s(y-b)$ and $s>0$, a target $z$ has the inverse
+\begin{equation}
+y=b+\frac{z-N(b)}s.
+\end{equation}
+Substitution verifies the inverse, provided the resulting income lies in that bracket. Globally using it requires a valid bracket selection; positive slope is necessary for the intended increasing inverse.
+
+For payable hours $h>0$, required additional gross pay $g$, legal hourly minimum $w_0$, wage quantum $\Delta>0$, payroll funding $B\geq0$, and employer charge rate $c_e\geq0$, the grid endpoints are
+\begin{equation}
+w_{\min}=\Delta\left\lceil\frac{\max(w_0,g/h)}\Delta\right\rceil,
+\qquad
+w_{\max}=\Delta\left\lfloor\frac{B}{(1+c_e)h\Delta}\right\rfloor.
+\end{equation}
+There is no feasible wage in this interval if $w_{\min}>w_{\max}$. Expected receipts can inform a proposed payroll ceiling, for example $\operatorname{clip}(R-C-K;0,B_0)$ for receipts $R$, nonlabor costs $C$, contingency $K$, and budget cap $B_0\geq0$. Actual payroll still requires settled funding.
+
+For household cash cost $C$, funded non-wage provision $O$, participating adults $a>0$, and normal day $h_0>0$, define the hourly anchor $v=[C-O]_+/(ah_0)$. The specified refusal factor at nonnegative cover days $d$ is
+\begin{equation}
+r(d)=\frac35+\frac2{35}\min(d,21/2),\qquad \frac35\leq r(d)\leq\frac65.
+\end{equation}
+The required net hourly rate is $r(d)v+c_w$ for work cost $c_w$, with factor $6/5$ in the specified zero-cash-cost branch. These are decision rules rather than conclusions of the production equations.
+
+With mandate, withdrawal capacity, alternatives, concentration, and replacement availability denoted by $m,w,a,c,r\in[0,1]$, one bargaining weight is
+\begin{equation}
+\lambda=\frac{\max(1,7+5m+4w+3a-4c-3r)}{20}.
+\end{equation}
+It lies in $[1/20,19/20]$ by bounding the numerator. For first and desired offers $p,d$, a second offer rounds $p+\lambda(d-p)$ down to the wage grid and clips to legal grid-aligned endpoints. Consent is a separate acceptance condition.
+
+For grievance $g$, solidarity $s$, trust $t$, efficacy $e$, peer support $p$, cost $c$, and risk $r$, all in $[0,1]$, the score
+\begin{equation}
+z=2g+s+t+e+p-2c-r-\frac32
+\end{equation}
+lies in $[-9/2,9/2]$. The lower extreme sets all positive terms to zero and both negative inputs to one; the upper extreme reverses them. A sigmoid of this score is a participation propensity, not an authorization or a funded support payment.
+
+\section{Dated finance and collective support}
+A positive endpoint balance is insufficient to fund a dated plan. Let $c_j$ be outflows minus receipts at step $j$, and $k_t\geq0$ the required cash cushion after the first $t$ steps, including $t=0$. Define
+\begin{equation}
+C_t=\sum_{j=1}^{t}c_j,\qquad
+F^*=\max_{0\leq t\leq d}(k_t+C_t),\qquad
+G=[F^*-F_0]_+.
+\end{equation}
+Here $F_0$ is opening cash and $G$ is the additional opening financing gap.
+
+\begin{theorem}[Exact opening funding requirement]
+The plan maintains every cushion if and only if $F_0\geq F^*$. If nonnegative financing is supplied entirely at opening, its smallest sufficient amount is $G$.
+\end{theorem}
+\begin{proof}
+Cash after prefix $t$ is $F_0-C_t$. Thus all cushion constraints are equivalent to $F_0\geq k_t+C_t$ for every $t$, which is equivalent to exceeding their maximum. With opening financing $g\geq0$, replace $F_0$ by $F_0+g$; the least admissible $g$ is $[F^*-F_0]_+$.
+\end{proof}
+
+For costs $(8,-10)$, the final net cost is $-2$, yet eight units of opening funding are required when cushions are zero. A constant cushion of three raises the requirement to eleven. These are feasibility statements for the specified dated cash flows, not guarantees that forecast receipts will occur.
+
+New lending may be limited simultaneously by request $L_r$, debt service, collateral, capital, and liquidity. With term $t>0$, rate $r\geq0$, available surplus $s$, service fraction $f$, existing debt service $D$, advance fraction $a$, collateral $V$, secured debt $S$, bank equity $E$, minimum capital ratio $k>0$, existing risk assets $R$, risk weight $w>0$, and liquidity $\Lambda\geq0$, define
+\begin{equation}
+L_s=\frac{t(fs-D)}{1+rt},\qquad
+L_c=aV-S,\qquad L_k=\frac{E-kR}{kw},
+\end{equation}
+\begin{equation}
+L^*=\bigl[\min(L_r,L_s,L_c,L_k,\Lambda)\bigr]_+.
+\end{equation}
+The formula gives $0\leq L^*\leq\Lambda$. If any headroom is negative, proposed new lending is zero; existing debt is not rewritten. Contract terms, consent, and actual settlement remain event conditions.
+
+Other bounded proposals include a replacement earmark $\operatorname{clip}(T-E;0,F)$ for target $T$, existing earmark $E$, and free cash $F\geq0$, and a rent bid $a\operatorname{clip}(Y-R;0,B)$ for bid fraction $a\in[0,1]$, before-rent amount $Y$, retained funds $R$, and budget $B\geq0$. For a dated cash-flow sequence $f_j$ and rate $r>-1$, discounted evaluation is $\sum_j f_j/(1+r)^j$. Discounted value does not replace the prefix funding test.
+
+\begin{proposition}[Proportional household support]
+Let distinct eligible households have unmet needs $n_h\geq0$, total $N=\sum_h n_h$, and available treasury $T\geq0$. Set
+\begin{equation}
+\lambda=\begin{cases}0,&N=0,\\\min(1,T/N),&N>0,\end{cases}
+\qquad g_h=\lambda n_h.
+\end{equation}
+Then $0\leq g_h\leq n_h$ and $\sum_h g_h=\min(T,N)$.
+\end{proposition}
+\begin{proof}
+If $N=0$, nonnegativity forces every need to vanish. If $N>0$, then $0\leq\lambda\leq1$ and $\sum_hg_h=\lambda N=\min(N,T)$. These identities give both individual and aggregate bounds.
+\end{proof}
+
+For needs $(2,4,6)$ and treasury six, grants are $(1,2,3)$. Each household is indexed once, independently of how many members participate. The theorem describes a real-valued allocation; an integer-tick settlement needs a specified rounding or fractional-claim rule and funded payment events.
+
+\section{Causal order and independent transactions}
+Fix a finite batch of identified events between observation boundaries, with fixed payloads, rules, and arithmetic. Each event $e$ has a dependency set $F_e$ containing every mutable coordinate it reads or writes, including coordinates consulted by its accept/reject decision. The event changes nothing outside $F_e$. If two input states agree on $F_e$, their output states agree on $F_e$ and the event makes the same decision in both.
+
+These conditions apply to the complete bundles of Section 2 whenever $F_e$ contains all nonzero debits and credits and every state coordinate read by the authorization predicate. Zero debits outside $F_e$ impose no additional resource constraint. Thus feasibility and the update within $F_e$ depend only on that restriction of the state.
+
+\begin{theorem}[Independent events commute]
+If $F_e\cap F_f=\varnothing$, then for every initial state $s$,
+\begin{equation}
+T_e(T_f(s))=T_f(T_e(s)).
+\end{equation}
+Each event's accept/reject decision is unchanged by performing the other first.
+\end{theorem}
+\begin{proof}
+Event $f$ changes nothing in $F_e$, so $T_f(s)$ and $s$ agree there. Locality gives the same decision for $e$ and the same updated values inside $F_e$ in both states. By symmetry, the corresponding statement holds for $f$. On a coordinate in $F_e$, both compositions therefore give the result of $e$; on a coordinate in $F_f$, both give the result of $f$. Outside their union, both give the original state. Disjointness exhausts these cases.
+\end{proof}
+
+\begin{corollary}[Preservation under safe reordering]
+Any order obtained from a serial order by finitely many adjacent swaps of events with disjoint dependency sets has the same final state and the same decision for every identified event.
+\end{corollary}
+\begin{proof}
+One swap sees the same state after the preceding prefix. The theorem preserves both decisions and the state after the swapped pair. Every later event therefore sees the same state as before that swap. Induction on the number of swaps proves the result.
+\end{proof}
+
+To connect this criterion with a dependency graph, give each event its rank in a canonical serial order and draw a forward edge for every pair of intersecting dependency sets. Every edge strictly increases rank, so a directed cycle is impossible. Any topological order of this graph is obtainable by the permitted adjacent swaps: move its first event leftward through the serial list; every crossed event must be independent, since otherwise a forward edge would forbid that move. Repeat on the remaining list. This is a mathematical sufficient condition for a scheduler whose graph contains every such conflict.
+
+The conditions concern full read dependencies, not merely shared writes. Two events writing different accounts can still conflict if one reads a balance changed by the other. Observation boundaries, refreshed proposals, or order-dependent draw identities can also change the event functions; they must not be silently crossed or changed in applying the theorem.
+
+\begin{proposition}[A restricted divisible-pool shortcut]
+Let a divisible resource have capacity $C\geq0$, and let nonnegative prevalidated demands $a_1,\ldots,a_d$ be processed in order, with no inflows and no additional failure gates. Serial partial fills are
+\begin{equation}
+f_j=\min\left(a_j,\left[C-\sum_{i<j}a_i\right]_+\right),
+\qquad \sum_{j=1}^{d}f_j=\min\left(C,\sum_{j=1}^{d}a_j\right).
+\end{equation}
+\end{proposition}
+\begin{proof}
+For nonnegative remaining capacity $R$ and demand $a$, the amount left after filling is $R-\min(a,R)=[R-a]_+$. Induction therefore gives remaining capacity $[C-\sum_{i\leq j}a_i]_+$ after step $j$. Subtract the final remainder from the initial capacity to obtain the total-fill identity.
+\end{proof}
+
+Capacity five and demands $(2,4,1)$ give divisible fills $(2,3,0)$. For indivisible jobs demanding $(6,4)$, the complete-event rule rejects the first and accepts the second, leaving one. The divisible formula instead assigns five to the first demand. These are different allocation rules, so the shortcut cannot replace general event resolution.
+
+\section{An exact production and research example}
+Consider grain and bread with one occupation:
+\begin{equation}
+A=\begin{pmatrix}1/2&1\\0&0\end{pmatrix},\qquad
+H=\begin{pmatrix}1&1\end{pmatrix},\qquad
+N=\begin{pmatrix}2&2\\0&1\end{pmatrix}.
+\end{equation}
+Multiplication verifies $(I-A)N=N(I-A)=I$. Thus $G=HN=(2,3)$. With occupational weight one, one unit of grain requires two hours and one unit of bread requires three hours, including its upstream grain.
+
+For the optional reproduction model choose
+\begin{equation}
+P=\begin{pmatrix}1/8\\1/12\end{pmatrix},\qquad
+T=[1/4],\qquad M=GP+T=[3/4].
+\end{equation}
+The raw occupational solution is $\beta=1/(1-3/4)=4$, with $u=G^{\mathsf T}\beta=(8,12)^{\mathsf T}$. Normalization gives $\alpha=1$, $\kappa=1/4$, and $v=(2,3)^{\mathsf T}$. The raw and normalized accounts answer the same equations with different residual scales.
+
+One research attempt uses half a unit of grain, one unit of bread, and two direct hours:
+\begin{equation}
+J=\begin{pmatrix}1/2\\1\end{pmatrix},\qquad F=[2],\qquad
+\eta=J^{\mathsf T}v+F^{\mathsf T}\alpha=6.
+\end{equation}
+For final deliveries of two breads and one attempt, $y=(0,2)^{\mathsf T}$ and $z=1$, so
+\begin{equation}
+x=N(y+Jz)=\begin{pmatrix}7\\3\end{pmatrix},\qquad
+Hx+Fz=12=v^{\mathsf T}y+\eta z.
+\end{equation}
+The research goods are included once, through $Jz$. Adding them again to $y$ would double count them.
+
+For a scalar-value approximation $\widetilde v=(1.9,2.9)^{\mathsf T}$, choose the certificate for $A^{\mathsf T}$ with $w=(1,2)^{\mathsf T}$ and $c=1/2$. Direct multiplication gives
+\begin{equation}
+A^{\mathsf T}w=\tfrac12w,\qquad
+H^{\mathsf T}+A^{\mathsf T}\widetilde v-\widetilde v
+=\begin{pmatrix}1/20\\0\end{pmatrix}.
+\end{equation}
+The weighted residual is $1/20$, so the weighted error is at most $1/10$. Coordinate error bounds are $1/10$ for grain and $1/5$ for bread. The actual errors are both $1/10$, consistent with the certificate. By contrast, $w=(3,1)^{\mathsf T}$ and $c=5/6$ certify $A$ but fail for $A^{\mathsf T}$ in the second coordinate.
+
+With two occupations the normalization can be nontrivial. Take $A=0$ and
+\begin{equation}
+H=\begin{pmatrix}1&2\\0&1\end{pmatrix},\qquad
+P=\begin{pmatrix}1/4&1/8\\0&0\end{pmatrix},\qquad
+T=\begin{pmatrix}0&0\\1/4&0\end{pmatrix}.
+\end{equation}
+Then $M=HP+T$ has row sums $3/8$ and $1/4$, so $\rho(M)\leq3/8<1$. Solving the two equations and normalizing to occupation one gives
+\begin{equation}
+\beta=\frac1{23}\begin{pmatrix}40\\28\end{pmatrix},\quad
+\alpha=\begin{pmatrix}1\\7/10\end{pmatrix},\quad
+v=\begin{pmatrix}1\\27/10\end{pmatrix},\quad \kappa=\frac{23}{40}.
+\end{equation}
+These values satisfy $\alpha=M^{\mathsf T}\alpha+\kappa\mathbf1$ directly. No equality of occupations was imposed by the production balance alone.
+
+A payroll example illustrates the distinct financial account. Let $\tau(y)=y/10+[y-100]_+/5$ and $c=1/20$. Then $N(80)=68$ and $N(100)=85$. Above the threshold, the net slope is $13/20$, so achieving cumulative net income $92$ requires cumulative gross income $1440/13$. From an already paid base of $80$, the additional gross requirement is $400/13$. Over five payable hours on a cent grid, the hourly floor is $6.16$. Funding of $40$ with employer charge $10\%$ gives a cap of $7.27$. Paying the floor gives gross $30.80$ and additional net income $24.02$, meeting the target net increment of $24$.
+
+\section{Interpretation and source}
+The mathematical results establish conditional identities, existence criteria, inequalities, and invariances. They do not assert that a selected recipe is empirically accurate, that a labor-weighting convention is uniquely justified by economic observations, or that a proposed policy will achieve a desired social outcome. Production requirements, chronological work, money income, and settled cash are distinct quantities with specified connections.
+
+For example, a labeled analytical comparator may take living labor $L$ and reproduction requirement $R$ to the difference $L-R$, with rate $(L-R)/R$ defined only when $R>0$. Its interpretation depends on the chosen population, period, occupation classification, and comparator convention. The formula alone is not a statement about monetary profit.
+
+The event-reordering theorem likewise establishes a sufficient mathematical condition, not the correctness of arbitrary parallel execution. A concrete implementation must supply complete dependencies and the declared arithmetic, maintain transaction boundaries, and show that its reordered execution satisfies the theorem's hypotheses. Exact integer identities do not by themselves rule out overflow in bounded machine arithmetic.
+
+The model source is Unified Economic Simulator v6.2: Explained GPU Formulas, reader's edition dated 27 October 2026, together with its accompanying mathematical formalization. This article reorganizes those contracts into conventional definitions, theorem statements, proofs, and exact examples. The behavioral formulas are stated as modeling choices. The proofs here can be read independently of the implementation or proof-assistant source.
+
+\end{document}

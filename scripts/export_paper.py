@@ -4,9 +4,9 @@
 The .tex file is also a standalone LaTeX source. This exporter supports the
 small article subset used there and fails on unrecognized markup.
 """
+import argparse
 import hashlib
 import json
-import os
 from pathlib import Path
 import re
 import subprocess
@@ -14,15 +14,20 @@ import subprocess
 ROOT = Path(__file__).resolve().parent.parent
 WORK = ROOT / ".tools" / "paper"
 SOURCE = ROOT / "research_context_mathematical_paper.tex"
-OUTPUT = ROOT / "research_context_mathematical_paper.pdf"
 
 
 def parse_article(source):
     body = source.split(r"\maketitle", 1)[1].split(r"\end{document}", 1)[0]
+    title = re.search(r"\\title\{([^{}]+)\}", source)
+    date = re.search(r"\\date\{([^{}]*)\}", source)
+    if not title or not date:
+        raise ValueError("The article needs a plain-text title and date.")
+    title_lines = re.split(r"\\\\(?:\[[^\]]*\])?", title.group(1))
+    title_lines = [line.replace(r"\large", "").strip() for line in title_lines]
     blocks = [
-        {"kind": "title", "text": "Research as Production Context"},
-        {"kind": "subtitle", "text": "Conditional labor requirements, reusable capabilities,\nand normalized occupational conversion"},
-        {"kind": "date", "text": "24 October 2026"},
+        {"kind": "title", "text": title_lines[0]},
+        {"kind": "subtitle", "text": "\n".join(title_lines[1:])},
+        {"kind": "date", "text": date.group(1)},
     ]
     token = re.compile(
         r"\\begin\{equation\}(.*?)\\end\{equation\}"
@@ -73,17 +78,24 @@ def parse_article(source):
 
 
 def main():
-    WORK.mkdir(parents=True, exist_ok=True)
-    source = SOURCE.read_text()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("source", nargs="?", type=Path, default=SOURCE)
+    parser.add_argument("--output", type=Path)
+    args = parser.parse_args()
+    source_path = args.source.resolve()
+    output = args.output.resolve() if args.output else source_path.with_suffix(".pdf")
+    work = WORK if source_path == SOURCE else WORK / source_path.stem
+    work.mkdir(parents=True, exist_ok=True)
+    source = source_path.read_text()
     payload = {"blocks": parse_article(source), "sourceSHA256": hashlib.sha256(source.encode()).hexdigest()}
-    input_path = WORK / "article.json"
+    input_path = work / "article.json"
     input_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2))
     subprocess.run(["node", str(ROOT / "scripts/paper_mathml.js"), str(input_path)], check=True)
     subprocess.run([
         "swift", "-module-cache-path", str(WORK / "swift-cache"),
-        str(ROOT / "scripts/render_paper.swift"), str(input_path), str(OUTPUT), str(WORK)
+        str(ROOT / "scripts/render_paper.swift"), str(input_path), str(output), str(work)
     ], check=True, cwd=ROOT)
-    print(f"Created {OUTPUT}")
+    print(f"Created {output}")
 
 
 if __name__ == "__main__":

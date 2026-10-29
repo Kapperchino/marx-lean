@@ -13,6 +13,15 @@ It is a Lean specification and proof library, not a running economic simulator o
 a GPU implementation. The correspondence table below distinguishes definitions,
 proved properties and implementation obligations.
 
+The conventional mathematical exposition is
+[`unified_economic_simulator_v6_2_mathematical_paper.pdf`](unified_economic_simulator_v6_2_mathematical_paper.pdf).
+It presents definitions, equations, theorem statements, prose proofs, and exact
+examples for the current model. Its editable source is
+[`unified_economic_simulator_v6_2_mathematical_paper.tex`](unified_economic_simulator_v6_2_mathematical_paper.tex).
+Regenerate it on macOS with
+`python3 scripts/export_paper.py unified_economic_simulator_v6_2_mathematical_paper.tex`,
+or compile the source with a standard LaTeX installation.
+
 The earlier research-accounting exposition remains available as
 [`research_context_mathematical_paper.pdf`](research_context_mathematical_paper.pdf),
 with consolidated theorem statements, prose proofs, equations, and small examples. Its editable

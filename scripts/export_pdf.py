@@ -49,6 +49,20 @@ def sha(data: bytes) -> str:
 
 def main() -> None:
     WORK.mkdir(parents=True, exist_ok=True)
+    readme = (ROOT / "README.md").read_text()
+    if SOURCE_PDF.is_file():
+        paper_hash = sha(SOURCE_PDF.read_bytes())
+        paper_hash_source = "Computed from the supplied v6.2 model PDF during this export."
+    else:
+        recorded_hash = re.search(r"v6\.2 source SHA-256:\s*`([0-9a-f]{64})`", readme)
+        if not recorded_hash:
+            raise SystemExit("The v6.2 model PDF and its recorded README checksum are both unavailable.")
+        paper_hash = recorded_hash.group(1)
+        paper_hash_source = (
+            "Recorded in README.md. The v6.2 model PDF was unavailable during this export, "
+            "so its checksum was not independently reverified."
+        )
+        print(paper_hash_source, flush=True)
     env = dict(os.environ)
     env["PATH"] = str(Path.home() / ".elan" / "bin") + os.pathsep + env["PATH"]
     paths = [ROOT / "MarxLeanProof.lean"] + [ROOT / "MarxLeanProof" / f"{n}.lean" for n, _ in ORDER]
@@ -88,8 +102,9 @@ def main() -> None:
         "auditCount": int(audit.group(1)),
         "lineCount": sum(len(s["text"].splitlines()) for s in sources),
         "bundleHash": bundle_hash,
-        "paperHash": sha(SOURCE_PDF.read_bytes()),
-        "readme": (ROOT / "README.md").read_text(),
+        "paperHash": paper_hash,
+        "paperHashSource": paper_hash_source,
+        "readme": readme,
         "sources": sources,
         "config": config,
     }
